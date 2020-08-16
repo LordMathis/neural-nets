@@ -169,6 +169,29 @@ int apply(Matrix *a, double (*fn)(double))
     return 0;    
 }
 
+int hadamard(Matrix *a, Matrix *b, Matrix *result)
+{
+    if (is_null(a) || is_null(b))
+    {
+        return -1;
+    }
+
+    if (a->rows != b->rows || a->cols != b->cols || a->rows != result->rows || a->cols != result->cols)
+    {
+        return -1;
+    }
+
+    for (int i = 0; i < a->rows; i++)
+    {
+        for (int j = 0; j < a->cols; j++)
+        {
+            result->matrix[i][j] = a->matrix[i][j] * b->matrix[i][j];
+        }        
+    }
+
+    return result;    
+}
+
 int is_null(Matrix *a)
 {
     if (a == NULL || a->matrix == NULL)
