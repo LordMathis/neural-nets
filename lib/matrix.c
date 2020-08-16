@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-Matrix* init_matrix(int rows, int cols, const double mat[rows][cols]) {
+Matrix* create_matrix(int rows, int cols, const double mat[rows][cols])
+{
     Matrix *matrix = (Matrix *) malloc (sizeof (Matrix));
 
     matrix->rows = rows;
@@ -10,13 +11,17 @@ Matrix* init_matrix(int rows, int cols, const double mat[rows][cols]) {
 
 
     matrix->matrix = (double**) malloc (sizeof (double*) *rows);
-    for (int i = 0; i < rows; i++) {
+    for (int i = 0; i < rows; i++)
+    {
         matrix->matrix[i] = (double*) malloc (sizeof (double) *cols);
-        for (int j = 0; j < cols; j++) {
-            if (mat != NULL) {
+        for (int j = 0; j < cols; j++)
+        {
+            if (mat != NULL)
+            {
                 matrix->matrix[i][j] = mat[i][j];
             }
-            else {
+            else
+            {
                 matrix->matrix[i][j] = 0;
             }
         }
@@ -25,7 +30,8 @@ Matrix* init_matrix(int rows, int cols, const double mat[rows][cols]) {
     return matrix;
 }
 
-void print_matrix(Matrix *matrix) {
+void print_matrix(Matrix *matrix)
+{
     for (int i = 0; i < matrix->rows; i++)
     {
         printf("[ ");
@@ -37,13 +43,17 @@ void print_matrix(Matrix *matrix) {
     }    
 }
 
-int transpose(Matrix *a, Matrix *result) {
-    if (is_null(a) || is_null(result)) {
+int transpose(Matrix *a, Matrix *result)
+{
+    if (is_null(a) || is_null(result))
+    {
         return -1;
     }
 
-    for (int i = 0; i < a->rows; i++) {
-        for (int j = 0; j < a->cols; j++) {
+    for (int i = 0; i < a->rows; i++)
+    {
+        for (int j = 0; j < a->cols; j++)
+        {
             result->matrix[j][i] = a->matrix[i][j];
         }        
     }
@@ -51,20 +61,26 @@ int transpose(Matrix *a, Matrix *result) {
     return 0;
 }
 
-int multiply(Matrix *a, Matrix *b, Matrix *result) {
+int multiply(Matrix *a, Matrix *b, Matrix *result)
+{
 
-    if (is_null(a) || is_null(b) || is_null(result)) {
+    if (is_null(a) || is_null(b) || is_null(result))
+    {
         return -1;
     }
 
-    if (a->cols != b->rows || a->rows != result->rows || b->cols != result->cols) {
+    if (a->cols != b->rows || a->rows != result->rows || b->cols != result->cols)
+    {
         return -1;
     }
 
-    for (int i = 0; i < a->rows; i++) {
-        for (int j = 0; j < b->cols; j++) {
+    for (int i = 0; i < a->rows; i++)
+    {
+        for (int j = 0; j < b->cols; j++)
+        {
             result->matrix[i][j] = 0;
-            for (int k = 0; k < a->cols; k++) {
+            for (int k = 0; k < a->cols; k++)
+            {
                 result->matrix[i][j] += a->matrix[i][k] * b->matrix[k][j];
             }            
         }        
@@ -74,16 +90,20 @@ int multiply(Matrix *a, Matrix *b, Matrix *result) {
 }
 
 int add(Matrix *a, Matrix *b) {
-    if (is_null(a) || is_null(b)) {
+    if (is_null(a) || is_null(b))
+    {
         return -1;
     }
 
-    if (a->rows != b->rows || a->cols != b->cols) {
+    if (a->rows != b->rows || a->cols != b->cols)
+    {
         return -1;
     }
 
-    for (int i = 0; i < a->rows; i++) {
-        for (int j = 0; j < a->cols; j++) {
+    for (int i = 0; i < a->rows; i++)
+    {
+        for (int j = 0; j < a->cols; j++)
+        {
             a->matrix[i][j] += b->matrix[i][j];
         }        
     }
@@ -91,13 +111,17 @@ int add(Matrix *a, Matrix *b) {
     return 0;
 }
 
-int scalar_multiply(Matrix *a, double x) {
-    if (is_null(a)) {
+int scalar_multiply(Matrix *a, double x)
+{
+    if (is_null(a))
+    {
         return -1;
     }
 
-    for (int i = 0; i < a->rows; i++) {
-        for (int j = 0; j < a->cols; j++) {
+    for (int i = 0; i < a->rows; i++)
+    {
+        for (int j = 0; j < a->cols; j++)
+        {
             a->matrix[i][j] *= x;
         }        
     }  
@@ -106,12 +130,15 @@ int scalar_multiply(Matrix *a, double x) {
 }
 
 int scalar_add(Matrix *a, double x) {
-    if (is_null(a)) {
+    if (is_null(a))
+    {
         return -1;
     }
 
-    for (int i = 0; i < a->rows; i++) {
-        for (int j = 0; j < a->cols; j++) {
+    for (int i = 0; i < a->rows; i++)
+    {
+        for (int j = 0; j < a->cols; j++)
+        {
             a->matrix[i][j] += x;
         }        
     }
@@ -119,20 +146,48 @@ int scalar_add(Matrix *a, double x) {
     return 0;
 }
 
-int is_null(Matrix *a) {
-    if (a == NULL || a->matrix == NULL) {
+int apply(Matrix *a, double (*fn)(double))
+{
+    if (is_null(a))
+    {
+        return -1;
+    }
+
+    if (fn == NULL)
+    {
+        return -1;
+    }
+
+    for (int i = 0; i < a->rows; i++)
+    {
+        for (int j = 0; j < a->cols; j++)
+        {
+            a->matrix[i][j] = fn(a->matrix[i][j]);
+        }        
+    }
+
+    return 0;    
+}
+
+int is_null(Matrix *a)
+{
+    if (a == NULL || a->matrix == NULL)
+    {
         return 1;
     }
 
     return 0;
 }
 
-int delete(Matrix *a) {
-    if (is_null(a)) {
+int delete(Matrix *a)
+{
+    if (is_null(a))
+    {
         return -1;
     }
 
-    for (int i = 0; i < a->rows; i++) {
+    for (int i = 0; i < a->rows; i++)
+    {
         free(a->matrix[i]);
     }
 
