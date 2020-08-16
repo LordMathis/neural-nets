@@ -189,7 +189,7 @@ int hadamard(Matrix *a, Matrix *b, Matrix *result)
         }        
     }
 
-    return result;    
+    return 0;    
 }
 
 int is_null(Matrix *a)

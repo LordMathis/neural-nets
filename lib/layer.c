@@ -1,6 +1,9 @@
 #include "layer.h"
 #include "matrix.h"
 #include <stdlib.h>
+#include <math.h>
+
+static int init_layer(Layer *layer);
 
 Layer* create_layer(int layer_size, int input_size, double (*fn)(double))
 {
@@ -47,6 +50,8 @@ int layer_compute(Layer *layer, Matrix *input)
     multiply(layer->weights, input, layer->neurons);
     add(layer->neurons, layer->bias);
     apply(layer->neurons, layer->activation_fn);
+
+    return 0;
 }
 
 int delete_layer(Layer *layer)

@@ -1,4 +1,5 @@
 #include "../lib/matrix.h"
+#include "test.h"
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -124,70 +125,102 @@ static int test_is_null()
 
 static int test_multiply()
 {
-    
+    int a_rows = 3;
+    int a_cols = 2;
+    const double a_mat[3][2] = {{2,1}, {3,2}, {5,3}};
+    Matrix *a_matrix = init_matrix(a_rows, a_cols, a_mat);
+
+    int b_rows = 2;
+    int b_cols = 3;
+    const double b_mat[2][3] = {{5,0,3}, {4,1,7}};
+
+    Matrix *b_matrix = init_matrix(b_rows, b_cols, b_mat);
+
+    int res_rows = 3;
+    int res_cols = 3;
+    const double res_mat[3][3] = {
+        {14.00, 1.00, 13.00 },
+        {23.00, 2.00, 23.00 },
+        {37.00, 3.00, 36.00 }
+    };
+
+    Matrix *res_matrix = init_matrix(res_rows, res_cols, NULL);
+    multiply(a_matrix, b_matrix, res_matrix);
+
+    if (res_matrix->matrix == NULL)
+    {
+        printf("Test multiply failed! Matrix is NULL");
+        return -1;
+    }
+
+    for (int i = 0; i < res_rows; i++)
+    {
+        for (int j = 0; j < res_cols; j++)
+        {
+            if (res_matrix->matrix[i][j] != res_mat[i][j])
+            {
+                printf("Test multiply failed! Matrix has wrong values");
+                return -1;
+            }
+        }        
+    }
+
+    delete(a_matrix);
+    delete(b_matrix);
+    delete(res_matrix);
+
+    printf("Test multiply passed");
+    return 0;
 }
 
-static int test_scalar_multiply();
-static int test_scalar_add();
-static int test_add();
-static int test_apply();
-static int test_delete();
+static int test_scalar_multiply()
+{
+    // TODO:
+    return 0;
+}
+
+static int test_scalar_add()
+{
+    // TODO:
+    return 0;
+}
+
+static int test_add()
+{
+    // TODO:
+    return 0;
+}
+
+static int test_apply()
+{
+    // TODO:
+    return 0;
+}
+
+static int test_delete()
+{
+    // TODO:
+    return 0;
+}
+
 
 int test_matrix()
 {
     int res;
-    res = test_create_matrix();
-    if (res == -1)
+    res += test_create_matrix();
+    res += test_transpose();
+    res += test_is_null();
+    res += test_multiply();
+    res += test_scalar_multiply();
+    res += test_scalar_add();
+    res += test_add();
+    res += test_apply();
+    res += test_delete();
+
+    if (res < 0)
     {
-        printf("Test matrix failed");
         return -1;
     }
-    res = test_transpose();
-    if (res == -1)
-    {
-        printf("Test matrix failed");
-        return -1;
-    }
-    res = test_is_null();
-    if (res == -1)
-    {
-        printf("Test matrix failed");
-        return -1;
-    }
-    res = test_multiply();
-    if (res == -1)
-    {
-        printf("Test matrix failed");
-        return -1;
-    }
-    res = test_scalar_multiply();
-    if (res == -1)
-    {
-        printf("Test matrix failed");
-        return -1;
-    }
-    res = test_scalar_add();
-    if (res == -1)
-    {
-        printf("Test matrix failed");
-        return -1;
-    }
-    res = test_add();
-    if (res == -1)
-    {
-        printf("Test matrix failed");
-        return -1;
-    }
-    res = test_apply();
-    if (res == -1)
-    {
-        printf("Test matrix failed");
-        return -1;
-    }
-    res = test_delete();
-    if (res == -1)
-    {
-        printf("Test matrix failed");
-        return -1;
-    }
+
+    return 0;
 }
