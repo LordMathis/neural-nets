@@ -1,10 +1,13 @@
 #include "../lib/matrix.h"
 #include "test.h"
+#include "test_utils.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 static int test_create_matrix()
 {
+    // Setup
     int rows = 3;
     int cols = 3;
 
@@ -12,16 +15,15 @@ static int test_create_matrix()
 
     Matrix *matrix = create_matrix(rows, cols, mat);
 
+    // Test
     if (matrix == NULL || matrix->matrix == NULL)
     {
-        printf("Test create matrix failed! Matrix is NULL\n");
-        return -1;
+        return log_failure(__func__, "Matrix is NULL");
     }
 
     if (matrix->rows != rows || matrix->cols != cols)
     {
-        printf("Test create matrix failed! Matrix has wrong dimensions\n");
-        return -1;
+        return log_failure(__func__, "Matrix has wrong dimensions");
     }
 
     for (int i = 0; i < rows; i++)
@@ -30,20 +32,19 @@ static int test_create_matrix()
         {
             if (matrix->matrix[i][j] != i+1)
             {
-                printf("Test create matrix failed! Matrix has wrong values\n");
-                return -1;
+                return log_failure(__func__, "Matrix has wrong values");
             }
         }        
     }
 
+    // Cleanup
     delete(matrix);
-
-    printf("Test create matrix passed\n");
-    return 0;
+    return log_success(__func__);
 }
 
 static int test_transpose()
 {
+    // Setup
     int rows = 2;
     int cols = 4;
 
@@ -57,16 +58,15 @@ static int test_transpose()
 
     transpose(matrix, transposed);
 
+    // Test
     if (transposed == NULL || transposed->matrix == NULL)
     {
-        printf("Test transpose matrix failed! Transposed matrix is NULL\n");
-        return -1;
+        return log_failure(__func__, "Transposed matrix is NULL\n");
     }
 
     if (transposed->rows != cols || transposed->cols != rows)
     {
-        printf("Test transposed matrix failed! Transposed matrix has wrong dimensions\n");
-        return -1;
+        return log_failure(__func__, " Transposed matrix has wrong dimensions\n");
     }
 
     for (int i = 0; i < rows; i++)
@@ -75,54 +75,58 @@ static int test_transpose()
         {
             if (matrix->matrix[i][j] != transposed->matrix[j][i])
             {
-                printf("Test transpose matrix failed! Transposed matrix has wrong values\n");
-                return -1;
+                return log_failure(__func__, "Transposed matrix has wrong values\n");
             }
         }        
     }
 
+    // Cleanup
+
     delete(matrix);
     delete(transposed);
 
-    printf("Test transpose matrix passed\n");
-    return 0;
+    return log_success(__func__);
 }
 
 static int test_is_null()
 {
+    // Setup
     Matrix *matrix = NULL;
 
+    // Test null pointer
     if(!is_null(matrix))
     {
-        printf("Test is null failed\n");
-        return -1;
+        return log_failure(__func__, "Matrix should be null");
     }
 
+    // Test non null matrix
     matrix = create_matrix(1,1,NULL);
     if(is_null(matrix))
     {
-        printf("Test is null failed\n");
-        return -1;
+        return log_failure(__func__, "Matrix should not be null");
+
     }
 
+    // Test null array
     double **temp = matrix->matrix;
     matrix->matrix = NULL;
 
     if(!is_null(matrix))
     {
-        printf("Test is null failed\n");
-        return -1;
+        return log_failure(__func__, "Matrix should be null");
+
     }
 
+    // Cleanup
     matrix->matrix = temp;
     delete(matrix);
 
-    printf("Test is null passed\n");
-    return 0;
+    return log_success(__func__);
 }
 
 static int test_multiply()
 {
+    // Setup
     int a_rows = 3;
     int a_cols = 2;
     const double a_mat[3][2] = {{2,1}, {3,2}, {5,3}};
@@ -137,14 +141,15 @@ static int test_multiply()
     int c_cols = 5;
     Matrix *c_matrix = create_matrix(c_rows, c_cols, NULL);
 
+    // Test multiply wrong dimensions
     Matrix *res_wrong_dims_mat = create_matrix(a_cols, c_rows, NULL);
     int res_wrong_dims = multiply(a_matrix, c_matrix, res_wrong_dims_mat);
     if (res_wrong_dims != -1)
     {
-        printf("Test multiply failed! Mismatched dimension should not be multiplied\n");
-        return -1;
+        return log_failure(__func__, "Mismatched dimension should not be multiplied");
     }
 
+    // Test multiply correct dimensions
     int res_rows = 3;
     int res_cols = 3;
     const double res_mat[3][3] = {
@@ -158,8 +163,7 @@ static int test_multiply()
 
     if (res_matrix->matrix == NULL)
     {
-        printf("Test multiply failed! Matrix is NULL\n");
-        return -1;
+        return log_failure(__func__, "Matrix should not be null");
     }
 
     for (int i = 0; i < res_rows; i++)
@@ -168,22 +172,22 @@ static int test_multiply()
         {
             if (res_matrix->matrix[i][j] != res_mat[i][j])
             {
-                printf("Test multiply failed! Matrix has wrong values\n");
-                return -1;
+                return log_failure(__func__, "Matrix has wrong values");
             }
         }        
     }
 
+    // Cleanup
     delete(a_matrix);
     delete(b_matrix);
     delete(res_matrix);
 
-    printf("Test multiply passed\n");
-    return 0;
+    return log_success(__func__);
 }
 
 static int test_scalar_multiply()
 {
+    // Setup
     int rows = 3;
     int cols = 3;
     const double a_mat[3][3] = {{1,2,3}, {4,5,6}, {7,8,9}};
@@ -191,13 +195,12 @@ static int test_scalar_multiply()
 
     double x = 0.5;
     const double res_mat[3][3] = {{0.5,1,1.5}, {2,2.5,3}, {3.5,4,4.5}};
-
     scalar_multiply(a, x);
 
+    // Test
     if (is_null(a))
     {
-        printf("Test scalar multiply failed. Matrix is NULL\n");
-        return -1;
+        return log_failure(__func__, "Matrix should not be null");
     }
 
     for (int i = 0; i < rows; i++)
@@ -206,33 +209,33 @@ static int test_scalar_multiply()
         {
             if (a->matrix[i][j] != res_mat[i][j])
             {
-                printf("Test scalar multiply failed. Matrix has wrong values\n");
-                return -1;
+                return log_failure(__func__, "Matrix has wrong values");
             }
         }        
     }
 
+    // Cleanup
     delete(a);    
-    printf("Test scalar multiply passed\n");
-    return 0;
+    return log_success(__func__);
 }
 
 static int test_scalar_add()
 {
+    // Setup
     int rows = 3;
     int cols = 3;
     const double a_mat[3][3] = {{1,2,3}, {4,5,6}, {7,8,9}};
     Matrix *a = create_matrix(rows, cols, a_mat);
 
     double x = 10.5;
-    const double res_mat[3][3] = {{10.5,12.5,13.5}, {14.5,15.5,16.5}, {17.5,18.5,19.5}};
+    const double res_mat[3][3] = {{11.5,12.5,13.5}, {14.5,15.5,16.5}, {17.5,18.5,19.5}};
 
     scalar_add(a, x);
 
+    // Test
     if (is_null(a))
     {
-        printf("Test scalar add failed. Matrix is NULL\n");
-        return -1;
+        return log_failure(__func__, "Matrix should not be null");
     }
 
     for (int i = 0; i < rows; i++)
@@ -241,15 +244,15 @@ static int test_scalar_add()
         {
             if (a->matrix[i][j] != res_mat[i][j])
             {
-                printf("Test scalar add failed. Matrix has wrong values\n");
+                return log_failure(__func__, "Matrix has wrong values");
                 return -1;
             }
         }        
     }
 
+    // Cleanup
     delete(a);    
-    printf("Test scalar add passed\n");
-    return 0;
+    return log_success(__func__);
 }
 
 static int test_add()
