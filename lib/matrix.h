@@ -1,3 +1,6 @@
+#ifndef MATRIX_H
+#define MATRIX_H
+
 typedef struct 
 {
     int rows;
@@ -15,3 +18,5 @@ int scalar_add(Matrix *matrix, double a);
 int add(Matrix *a, Matrix *b);
 int apply(Matrix *a, double (*fn)(double));
 int delete(Matrix *a);
+
+#endif /* MATRIX_H */

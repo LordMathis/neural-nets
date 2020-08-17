@@ -2,6 +2,7 @@
 #include "matrix.h"
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 
 static int init_layer(Layer *layer);
 
