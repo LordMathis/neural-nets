@@ -326,7 +326,7 @@ static int test_apply()
 
 int test_matrix()
 {
-    int res;
+    int res = 0;
     res += test_create_matrix();
     res += test_transpose();
     res += test_is_null();
@@ -336,10 +336,5 @@ int test_matrix()
     res += test_add();
     res += test_apply();
 
-    if (res < 0)
-    {
-        return -1;
-    }
-
-    return 0;
+    return res;
 }
