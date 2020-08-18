@@ -177,6 +177,8 @@ static int test_multiply()
     // Cleanup
     delete(a_matrix);
     delete(b_matrix);
+    delete(c_matrix);
+    delete(res_wrong_dims_mat);
     delete(res_matrix);
 
     return log_success(__func__);
@@ -241,14 +243,85 @@ static int test_scalar_add()
 
 static int test_add()
 {
-    // TODO:
-    return 0;
+    // Setup
+    int rows = 3;
+    int cols = 2;
+    const double a_mat[3][2] = {{2,1}, {3,2}, {5,3}};
+    Matrix *a_matrix = create_matrix(rows, cols, a_mat);
+
+    const double b_mat[3][2] = {{5,0}, {4,3}, {4,1}};
+    Matrix *b_matrix = create_matrix(rows, cols, b_mat);
+
+    int c_rows = 4;
+    int c_cols = 5;
+    Matrix *c_matrix = create_matrix(c_rows, c_cols, NULL);
+
+    // Test add wrong dimensions
+    int res_wrong_dims = add(a_matrix, c_matrix);
+    if (res_wrong_dims != -1)
+    {
+        return log_failure(__func__, "Sum of mismatched dimension matrices should not be possible");
+    }
+
+    // Test add correct dimensions
+    const double res_mat[3][2] = {
+        {7.00, 1.00 },
+        {7.00, 5.00 },
+        {9.00, 4.00 }
+    };
+
+    add(a_matrix, b_matrix);
+
+    if (is_null(a_matrix))
+    {
+        return log_failure(__func__, "Matrix should not be null");
+    }
+
+    if (!is_equal(a_matrix, rows, cols, res_mat))
+    {
+        return log_failure(__func__, "Wrong matrix dimensions or values");
+    }
+
+    // Cleanup
+    delete(a_matrix);
+    delete(b_matrix);
+    delete(c_matrix);
+
+    return log_success(__func__);
+}
+
+static double square(double num)
+{
+    return num*num;
 }
 
 static int test_apply()
 {
-    // TODO:
-    return 0;
+    // Setup
+    double (*square_ptr)(double) = &square;
+
+    int rows = 2;
+    int cols = 2;
+    const double a_mat[2][2] = {{1,2}, {3,4}};
+    Matrix *a_matrix = create_matrix(rows, cols, a_mat);
+
+    const double res_mat[2][2] = {{1,4}, {9, 16}};
+
+    apply(a_matrix, square_ptr);
+
+    if (is_null(a_matrix))
+    {
+        return log_failure(__func__, "Matrix should not be null");
+    }
+
+    if (!is_equal(a_matrix, rows, cols, res_mat))
+    {
+        return log_failure(__func__, "Wrong matrix dimensions or values");
+    }
+
+    delete(a_matrix);
+    square_ptr = NULL;
+    return log_success(__func__);
 }
 
 int test_matrix()
@@ -260,8 +333,8 @@ int test_matrix()
     res += test_multiply();
     res += test_scalar_multiply();
     res += test_scalar_add();
-    // res += test_add();
-    // res += test_apply();
+    res += test_add();
+    res += test_apply();
 
     if (res < 0)
     {
