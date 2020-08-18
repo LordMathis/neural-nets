@@ -5,6 +5,27 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+static int is_equal(Matrix *matrix, int rows, int cols, const double mat[rows][cols])
+{
+    if (matrix->rows != rows || matrix->cols != cols)
+    {
+        return 0;
+    }
+
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            if (matrix->matrix[i][j] != mat[i][j])
+            {
+                return 0;
+            }
+        }        
+    }
+
+    return 1;
+}
+
 static int test_create_matrix()
 {
     // Setup
@@ -16,25 +37,14 @@ static int test_create_matrix()
     Matrix *matrix = create_matrix(rows, cols, mat);
 
     // Test
-    if (matrix == NULL || matrix->matrix == NULL)
+    if (is_null(matrix))
     {
         return log_failure(__func__, "Matrix is NULL");
     }
 
-    if (matrix->rows != rows || matrix->cols != cols)
+    if (!is_equal(matrix, rows, cols, mat))
     {
-        return log_failure(__func__, "Matrix has wrong dimensions");
-    }
-
-    for (int i = 0; i < rows; i++)
-    {
-        for (int j = 0; j < cols; j++)
-        {
-            if (matrix->matrix[i][j] != i+1)
-            {
-                return log_failure(__func__, "Matrix has wrong values");
-            }
-        }        
+        return log_failure(__func__, "Wrong matrix dimensions or values");
     }
 
     // Cleanup
@@ -53,32 +63,25 @@ static int test_transpose()
         {5,6,6,7}
     };
 
+    double transposed_mat[4][2] = {
+        {1,5},
+        {2,6},
+        {3,6},
+        {4,7}
+    };
+
     Matrix *matrix = create_matrix(rows, cols, mat);
     Matrix *transposed = create_matrix(cols, rows, NULL);
 
     transpose(matrix, transposed);
 
     // Test
-    if (transposed == NULL || transposed->matrix == NULL)
+    if (is_null(transposed))
     {
         return log_failure(__func__, "Transposed matrix is NULL\n");
     }
 
-    if (transposed->rows != cols || transposed->cols != rows)
-    {
-        return log_failure(__func__, " Transposed matrix has wrong dimensions\n");
-    }
-
-    for (int i = 0; i < rows; i++)
-    {
-        for (int j = 0; j < cols; j++)
-        {
-            if (matrix->matrix[i][j] != transposed->matrix[j][i])
-            {
-                return log_failure(__func__, "Transposed matrix has wrong values\n");
-            }
-        }        
-    }
+    if (!is_equal(transposed, cols, rows, transposed_mat))
 
     // Cleanup
 
@@ -161,20 +164,14 @@ static int test_multiply()
     Matrix *res_matrix = create_matrix(res_rows, res_cols, NULL);
     multiply(a_matrix, b_matrix, res_matrix);
 
-    if (res_matrix->matrix == NULL)
+    if (is_null(res_matrix))
     {
         return log_failure(__func__, "Matrix should not be null");
     }
 
-    for (int i = 0; i < res_rows; i++)
+    if (!is_equal(res_matrix, res_rows, res_cols, res_mat))
     {
-        for (int j = 0; j < res_cols; j++)
-        {
-            if (res_matrix->matrix[i][j] != res_mat[i][j])
-            {
-                return log_failure(__func__, "Matrix has wrong values");
-            }
-        }        
+        return log_failure(__func__, "Wrong matrix dimensions or values");
     }
 
     // Cleanup
@@ -203,15 +200,9 @@ static int test_scalar_multiply()
         return log_failure(__func__, "Matrix should not be null");
     }
 
-    for (int i = 0; i < rows; i++)
+    if (!is_equal(a, rows, cols, res_mat))
     {
-        for (int j = 0; j < cols; j++)
-        {
-            if (a->matrix[i][j] != res_mat[i][j])
-            {
-                return log_failure(__func__, "Matrix has wrong values");
-            }
-        }        
+        return log_failure(__func__, "Wrong matrix dimensions or values");
     }
 
     // Cleanup
@@ -238,16 +229,9 @@ static int test_scalar_add()
         return log_failure(__func__, "Matrix should not be null");
     }
 
-    for (int i = 0; i < rows; i++)
+    if (!is_equal(a, rows, cols, res_mat))
     {
-        for (int j = 0; j < cols; j++)
-        {
-            if (a->matrix[i][j] != res_mat[i][j])
-            {
-                return log_failure(__func__, "Matrix has wrong values");
-                return -1;
-            }
-        }        
+        return log_failure(__func__, "Wrong matrix dimensions or values");
     }
 
     // Cleanup
