@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <stdio.h>
 
 static int init_layer(Layer *layer);
 
@@ -28,22 +29,22 @@ static int init_layer(Layer *layer)
     Matrix *bias = layer->bias;
 
     srand(time(NULL));
-    int range = sqrt(6/(weights->rows + weights->cols));
+    double range = sqrt((double) 6/(weights->rows + weights->cols));
 
     for (int i = 0; i < weights->rows; i++)
     {
         for (int j = 0; j < weights->cols; j++)
         {
-            weights->matrix[i][j] = (double)rand()/RAND_MAX*2*range - range;
+            weights->matrix[i][j] = (double) rand()/RAND_MAX*2*range - range;
         }        
     }
 
     for (int i = 0; i < bias->rows; i++)
     {
-        bias->matrix[i][1] = (double)rand()/RAND_MAX;
+        bias->matrix[i][0] = (double) rand()/RAND_MAX;
     }
-    
-    return 0;  
+
+    return 0;
 }
 
 int layer_compute(Layer *layer, Matrix *input)

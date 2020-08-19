@@ -1,6 +1,7 @@
 #include "matrix.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 Matrix* create_matrix(int rows, int cols, const double mat[rows][cols])
 {
@@ -196,10 +197,10 @@ int is_null(Matrix *a)
 {
     if (a == NULL || a->matrix == NULL)
     {
-        return 1;
+        return true;
     }
 
-    return 0;
+    return false;
 }
 
 int delete(Matrix *a)

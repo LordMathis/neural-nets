@@ -5,11 +5,11 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-static int is_equal(Matrix *matrix, int rows, int cols, const double mat[rows][cols])
+static bool is_equal(Matrix *matrix, int rows, int cols, const double mat[rows][cols])
 {
     if (matrix->rows != rows || matrix->cols != cols)
     {
-        return 0;
+        return false;
     }
 
     for (int i = 0; i < rows; i++)
@@ -18,12 +18,12 @@ static int is_equal(Matrix *matrix, int rows, int cols, const double mat[rows][c
         {
             if (matrix->matrix[i][j] != mat[i][j])
             {
-                return 0;
+                return false;
             }
         }        
     }
 
-    return 1;
+    return true;
 }
 
 static int test_create_matrix()
