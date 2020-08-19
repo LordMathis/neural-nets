@@ -9,22 +9,6 @@ static double activate(double x)
     return x;
 }
 
-static bool is_non_zero(Matrix *matrix)
-{
-    for (int i = 0; i < matrix->rows; i++)
-    {
-        for (int j = 0; j < matrix->cols; j++)
-        {
-            if (matrix->matrix[i][j] != 0)
-            {
-                return true;
-            }
-        }        
-    }
-    return false;
-    
-}
-
 static int test_create_layer()
 {
     // Setup
