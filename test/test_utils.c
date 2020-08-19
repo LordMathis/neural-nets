@@ -1,20 +1,20 @@
 #include <stdbool.h>
 #include <stdio.h>
+#include <test_utils.h>
 
-int log_failure(const char *test_name, const char *message)
+int fail(const char *test_name, const char *message)
 {
-    printf("\033[0;31m");    
-    printf("%s %s\n", test_name, message);
-    printf("\033[0m");
-
+    printf("%s%s %s%s\n", RED_COLOR, test_name, message, RESET_COLOR);
     return -1;
 }
 
-int log_success(const char *test_name)
+int eval_test_result(const char *test_name, int result)
 {
-    printf("\033[0;32m");    
-    printf("%s\n", test_name);
-    printf("\033[0m");
+    if (result<0) {
+        printf("%s%s failed%s\n", RED_COLOR, test_name, RESET_COLOR);
+    } else {
+        printf("%s%s passed%s\n", GREEN_COLOR, test_name, RESET_COLOR);
+    }
 
-    return 0;
+    return result;
 }

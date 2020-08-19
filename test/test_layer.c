@@ -28,6 +28,8 @@ static bool is_non_zero(Matrix *matrix)
 static int test_create_layer()
 {
     // Setup
+    int res = 0;
+
     int layer_size = 20;
     int input_size = 30;
 
@@ -38,32 +40,32 @@ static int test_create_layer()
     //Tests
     if (layer->num_neurons != layer_size)
     {
-        return log_failure(__func__, "Wrong layer size");
+        res+=fail(__func__, "Wrong layer size");
     }
 
     if (layer->activation_fn != act)
     {
-        return log_failure(__func__, "Wrong layer activation function");
+        res+=fail(__func__, "Wrong layer activation function");
     }
 
     if (is_null(layer->weights) || is_null(layer->bias) || is_null(layer->neurons))
     {
-        return log_failure(__func__, "Layer cannot be null");
+        res+=fail(__func__, "Layer cannot be null");
     }
 
     if (layer->weights->rows != input_size || layer->weights->cols != layer_size)
     {
-        return log_failure(__func__, "Wrong weight matrix dimensions");
+        res+=fail(__func__, "Wrong weight matrix dimensions");
     }
 
     if (layer->bias->rows != layer_size || layer->bias->cols != 1)
     {
-        return log_failure(__func__, "Wrong bias matrix dimensions");
+        res+=fail(__func__, "Wrong bias matrix dimensions");
     }
 
     if (layer->neurons->rows != layer_size || layer->neurons->cols != 1)
     {
-        return log_failure(__func__, "Wrong neurons matrix dimensions");
+        res+=fail(__func__, "Wrong neurons matrix dimensions");
     }
 
     // Test if layer is initialized
@@ -71,16 +73,18 @@ static int test_create_layer()
     {
         print_matrix(layer->weights);
         print_matrix(layer->bias);
-        return log_failure(__func__, "Layer is not properly initialized");
+        res+=fail(__func__, "Layer is not properly initialized");
     }
 
     // Cleanup
     delete_layer(layer);
-    return log_success(__func__);
+    return eval_test_result(__func__, res);
 }
 
 int test_layer_compute()
 {
+    int res = 0;
+
     int layer_size = 30;
     int input_size = 10;
 
@@ -95,18 +99,18 @@ int test_layer_compute()
 
     if (is_null(layer->neurons))
     {
-        return log_failure(__func__, "Layer neurons cannot be null");
+        res+=fail(__func__, "Layer neurons cannot be null");
     }
 
     if (!is_non_zero(layer->neurons))
     {
-        return log_failure(__func__, "Layer neurons should not be zero matrix");
+        res+=fail(__func__, "Layer neurons should not be zero matrix");
     }
 
         // Cleanup
     delete_layer(layer);
     delete(input);
-    return log_success(__func__);
+    return eval_test_result(__func__, res);
 }
 
 

@@ -29,6 +29,9 @@ static bool is_equal(Matrix *matrix, int rows, int cols, const double mat[rows][
 static int test_create_matrix()
 {
     // Setup
+    int res = 0;
+
+
     int rows = 3;
     int cols = 3;
 
@@ -39,22 +42,25 @@ static int test_create_matrix()
     // Test
     if (is_null(matrix))
     {
-        return log_failure(__func__, "Matrix is NULL");
+        res+=fail(__func__, "Matrix is NULL");
     }
 
     if (!is_equal(matrix, rows, cols, mat))
     {
-        return log_failure(__func__, "Wrong matrix dimensions or values");
+        res+=fail(__func__, "Wrong matrix dimensions or values");
     }
 
     // Cleanup
     delete(matrix);
-    return log_success(__func__);
+   
+    return eval_test_result(__func__, res);
 }
 
 static int test_transpose()
 {
     // Setup
+    int res = 0;
+
     int rows = 2;
     int cols = 4;
 
@@ -78,7 +84,7 @@ static int test_transpose()
     // Test
     if (is_null(transposed))
     {
-        return log_failure(__func__, "Transposed matrix is NULL\n");
+        res+=fail(__func__, "Transposed matrix is NULL\n");
     }
 
     if (!is_equal(transposed, cols, rows, transposed_mat))
@@ -87,26 +93,28 @@ static int test_transpose()
 
     delete(matrix);
     delete(transposed);
-
-    return log_success(__func__);
+   
+    return eval_test_result(__func__, res);
 }
 
 static int test_is_null()
 {
     // Setup
+    int res = 0;
+
     Matrix *matrix = NULL;
 
     // Test null pointer
     if(!is_null(matrix))
     {
-        return log_failure(__func__, "Matrix should be null");
+        res+=fail(__func__, "Matrix should be null");
     }
 
     // Test non null matrix
     matrix = create_matrix(1,1,NULL);
     if(is_null(matrix))
     {
-        return log_failure(__func__, "Matrix should not be null");
+        res+=fail(__func__, "Matrix should not be null");
 
     }
 
@@ -116,20 +124,22 @@ static int test_is_null()
 
     if(!is_null(matrix))
     {
-        return log_failure(__func__, "Matrix should be null");
+        res+=fail(__func__, "Matrix should be null");
 
     }
 
     // Cleanup
     matrix->matrix = temp;
     delete(matrix);
-
-    return log_success(__func__);
+   
+    return eval_test_result(__func__, res);
 }
 
 static int test_multiply()
 {
     // Setup
+    int res = 0;
+
     int a_rows = 3;
     int a_cols = 2;
     const double a_mat[3][2] = {{2,1}, {3,2}, {5,3}};
@@ -149,7 +159,7 @@ static int test_multiply()
     int res_wrong_dims = multiply(a_matrix, c_matrix, res_wrong_dims_mat);
     if (res_wrong_dims != -1)
     {
-        return log_failure(__func__, "Mismatched dimension should not be multiplied");
+        res+=fail(__func__, "Mismatched dimension should not be multiplied");
     }
 
     // Test multiply correct dimensions
@@ -166,12 +176,12 @@ static int test_multiply()
 
     if (is_null(res_matrix))
     {
-        return log_failure(__func__, "Matrix should not be null");
+        res+=fail(__func__, "Matrix should not be null");
     }
 
     if (!is_equal(res_matrix, res_rows, res_cols, res_mat))
     {
-        return log_failure(__func__, "Wrong matrix dimensions or values");
+        res+=fail(__func__, "Wrong matrix dimensions or values");
     }
 
     // Cleanup
@@ -180,13 +190,15 @@ static int test_multiply()
     delete(c_matrix);
     delete(res_wrong_dims_mat);
     delete(res_matrix);
-
-    return log_success(__func__);
+   
+    return eval_test_result(__func__, res);
 }
 
 static int test_scalar_multiply()
 {
     // Setup
+    int res = 0;
+
     int rows = 3;
     int cols = 3;
     const double a_mat[3][3] = {{1,2,3}, {4,5,6}, {7,8,9}};
@@ -199,22 +211,25 @@ static int test_scalar_multiply()
     // Test
     if (is_null(a))
     {
-        return log_failure(__func__, "Matrix should not be null");
+        res+=fail(__func__, "Matrix should not be null");
     }
 
     if (!is_equal(a, rows, cols, res_mat))
     {
-        return log_failure(__func__, "Wrong matrix dimensions or values");
+        res+=fail(__func__, "Wrong matrix dimensions or values");
     }
 
     // Cleanup
-    delete(a);    
-    return log_success(__func__);
+    delete(a); 
+   
+    return eval_test_result(__func__, res);
 }
 
 static int test_scalar_add()
 {
     // Setup
+    int res = 0;
+
     int rows = 3;
     int cols = 3;
     const double a_mat[3][3] = {{1,2,3}, {4,5,6}, {7,8,9}};
@@ -228,22 +243,25 @@ static int test_scalar_add()
     // Test
     if (is_null(a))
     {
-        return log_failure(__func__, "Matrix should not be null");
+        res+=fail(__func__, "Matrix should not be null");
     }
 
     if (!is_equal(a, rows, cols, res_mat))
     {
-        return log_failure(__func__, "Wrong matrix dimensions or values");
+        res+=fail(__func__, "Wrong matrix dimensions or values");
     }
 
     // Cleanup
-    delete(a);    
-    return log_success(__func__);
+    delete(a);   
+   
+    return eval_test_result(__func__, res);
 }
 
 static int test_add()
 {
     // Setup
+    int res = 0;
+
     int rows = 3;
     int cols = 2;
     const double a_mat[3][2] = {{2,1}, {3,2}, {5,3}};
@@ -260,7 +278,7 @@ static int test_add()
     int res_wrong_dims = add(a_matrix, c_matrix);
     if (res_wrong_dims != -1)
     {
-        return log_failure(__func__, "Sum of mismatched dimension matrices should not be possible");
+        res+=fail(__func__, "Sum of mismatched dimension matrices should not be possible");
     }
 
     // Test add correct dimensions
@@ -274,20 +292,20 @@ static int test_add()
 
     if (is_null(a_matrix))
     {
-        return log_failure(__func__, "Matrix should not be null");
+        res+=fail(__func__, "Matrix should not be null");
     }
 
     if (!is_equal(a_matrix, rows, cols, res_mat))
     {
-        return log_failure(__func__, "Wrong matrix dimensions or values");
+        res+=fail(__func__, "Wrong matrix dimensions or values");
     }
 
     // Cleanup
     delete(a_matrix);
     delete(b_matrix);
     delete(c_matrix);
-
-    return log_success(__func__);
+   
+    return eval_test_result(__func__, res);
 }
 
 static double square(double num)
@@ -298,6 +316,8 @@ static double square(double num)
 static int test_apply()
 {
     // Setup
+    int res = 0;
+
     double (*square_ptr)(double) = &square;
 
     int rows = 2;
@@ -311,17 +331,18 @@ static int test_apply()
 
     if (is_null(a_matrix))
     {
-        return log_failure(__func__, "Matrix should not be null");
+        res+=fail(__func__, "Matrix should not be null");
     }
 
     if (!is_equal(a_matrix, rows, cols, res_mat))
     {
-        return log_failure(__func__, "Wrong matrix dimensions or values");
+        res+=fail(__func__, "Wrong matrix dimensions or values");
     }
 
     delete(a_matrix);
     square_ptr = NULL;
-    return log_success(__func__);
+   
+    return eval_test_result(__func__, res);
 }
 
 int test_matrix()
