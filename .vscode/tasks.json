@@ -3,37 +3,9 @@
     "tasks": [
         {
             "type": "shell",
-            "label": "C/C++: gcc build tests",
-            "command": "/bin/gcc",
-            "args": [
-                "-g",
-                "${workspaceFolder}/test/*.c",
-                "${workspaceFolder}/lib/*.c",
-                "-o",
-                "${workspaceFolder}/build/test",
-                "-lm"
-            ],
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "problemMatcher": [
-                "$gcc"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
-        },
-        {
-            "type": "shell",
-            "label": "C/C++: gcc-9 build active file",
-            "command": "/usr/bin/gcc-9",
-            "args": [
-                "-g",
-                "${file}",
-                "-o",
-                "${fileDirname}/${fileBasenameNoExtension}"
-            ],
+            "label": "Make test",
+            "command": "/bin/make",
+            "args": [ "test" ],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
