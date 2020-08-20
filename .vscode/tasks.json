@@ -10,7 +10,7 @@
                 "${workspaceFolder}/test/*.c",
                 "${workspaceFolder}/lib/*.c",
                 "-o",
-                "${workspaceFolder}/test/test",
+                "${workspaceFolder}/build/test",
                 "-lm"
             ],
             "options": {
