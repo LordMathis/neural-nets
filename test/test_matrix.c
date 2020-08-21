@@ -327,7 +327,7 @@ static int test_apply()
 
     const double res_mat[2][2] = {{1,4}, {9, 16}};
 
-    apply(a_matrix, square_ptr);
+    apply(a_matrix, NULL, square_ptr);
 
     if (is_null(a_matrix))
     {

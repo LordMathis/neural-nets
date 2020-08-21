@@ -81,12 +81,12 @@ int test_layer_compute()
 
     layer_compute(layer, input);
 
-    if (is_null(layer->neurons))
+    if (is_null(layer->neurons_act))
     {
         res+=fail(__func__, "Layer neurons cannot be null");
     }
 
-    if (!is_non_zero(layer->neurons))
+    if (!is_non_zero(layer->neurons_act))
     {
         res+=fail(__func__, "Layer neurons should not be zero matrix");
     }
