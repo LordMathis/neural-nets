@@ -16,7 +16,7 @@ int multiply(Matrix *a, Matrix *b, Matrix *result);
 int scalar_multiply(Matrix *matrix, double a);
 int scalar_add(Matrix *matrix, double a);
 int add(Matrix *a, Matrix *b);
-int apply(Matrix *a, double (*fn)(double));
+int apply(Matrix *a, Matrix *result, double (*fn)(double));
 int delete(Matrix *a);
 
 #endif /* MATRIX_H */

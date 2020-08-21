@@ -147,8 +147,17 @@ int scalar_add(Matrix *a, double x) {
     return 0;
 }
 
-int apply(Matrix *a, double (*fn)(double))
+int apply(Matrix *a, Matrix *result, double (*fn)(double))
 {
+    if (is_null(result))
+    {
+        result = a;
+    }
+    else if (a->rows != result->rows || a->cols != result->cols)
+    {
+        return -1;
+    }    
+    
     if (is_null(a))
     {
         return -1;
@@ -163,11 +172,11 @@ int apply(Matrix *a, double (*fn)(double))
     {
         for (int j = 0; j < a->cols; j++)
         {
-            a->matrix[i][j] = fn(a->matrix[i][j]);
+            result->matrix[i][j] = fn(a->matrix[i][j]);
         }        
     }
 
-    return 0;    
+    return 0;
 }
 
 int hadamard(Matrix *a, Matrix *b, Matrix *result)
