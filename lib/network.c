@@ -41,7 +41,7 @@ Matrix* predict(Network *network, Matrix *input)
     {
         Layer *layer = network->layers[i];
         layer_compute(layer, layer_input);
-        layer_input = layer->neurons;
+        layer_input = layer->neurons_act;
     }
     
     return layer_input;
