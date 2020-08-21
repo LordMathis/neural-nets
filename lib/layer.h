@@ -8,6 +8,7 @@ typedef struct
     Matrix *weights;
     Matrix *bias;
     Matrix *neurons;
+    Matrix *neurons_act;
     double (*activation_fn)(double);
     int num_neurons;
 } Layer;

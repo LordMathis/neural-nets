@@ -17,6 +17,7 @@ Layer* create_layer(int layer_size, int input_size, double (*fn)(double))
     layer->weights = create_matrix(input_size, layer_size, NULL);
     layer->bias = create_matrix(layer_size, 1, NULL);
     layer->neurons = create_matrix(layer_size, 1, NULL);
+    layer->neurons_act = create_matrix(layer_size, 1, NULL);
 
     init_layer(layer);
 
@@ -51,7 +52,7 @@ int layer_compute(Layer *layer, Matrix *input)
 {
     multiply(layer->weights, input, layer->neurons);
     add(layer->neurons, layer->bias);
-    apply(layer->neurons, layer->activation_fn);
+    apply(layer->neurons, layer->neurons_act, layer->activation_fn);
 
     return 0;
 }
@@ -65,6 +66,7 @@ int delete_layer(Layer *layer)
     delete(layer->weights);
     delete(layer->bias);
     delete(layer->neurons);
+    delete(layer->neurons_act);
 
     free(layer);
     layer = NULL;
