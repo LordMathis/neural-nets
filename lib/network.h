@@ -1,5 +1,6 @@
 #include "layer.h"
 #include "matrix.h"
+#include "functions.h"
 
 typedef struct 
 {
@@ -7,6 +8,6 @@ typedef struct
     int num_layers;
 } Network;
 
-Network* create_network(int input_size, int num_layers, int layers[], double (*fn)(double));
+Network* create_network(int input_size, int num_layers, int layers[], Activation *activation);
 int delete_network(Network *network);
 Matrix* predict(Network *network, Matrix *input);

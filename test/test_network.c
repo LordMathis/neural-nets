@@ -16,9 +16,9 @@ static int test_create_network()
     int input_size = 10;
     int num_layers = 3;
     int layers[] = {30,20,10};
-    double (*f_ptr)(double) = &f;
 
-    Network *network = create_network(input_size, num_layers, layers, f_ptr);
+    Activation *sigmoid = create_sigmoid_activation();
+    Network *network = create_network(input_size, num_layers, layers, sigmoid);
 
     if (network->num_layers != num_layers)
     {
@@ -39,6 +39,7 @@ static int test_create_network()
     }
 
     delete_network(network);
+    delete_activation(sigmoid);
     return eval_test_result(__func__, res);
 }
 
@@ -49,9 +50,9 @@ int test_predict()
     int input_size = 10;
     int num_layers = 3;
     int layers[] = {30,20,10};
-    double (*f_ptr)(double) = &f;
 
-    Network *network = create_network(input_size, num_layers, layers, f_ptr);
+    Activation *sigmoid = create_sigmoid_activation();
+    Network *network = create_network(input_size, num_layers, layers, sigmoid);
 
     double input_mat[10][1] =  {{1},{1},{1},{1},{1},{1},{1},{1},{1},{1}};
     Matrix *input = create_matrix(10, 1, input_mat);
@@ -68,8 +69,9 @@ int test_predict()
         res += fail(__func__, "Result matrix should not 0");
     }
 
-    free(network);
     free(input);
+    delete_network(network);
+    delete_activation(sigmoid);
     return eval_test_result(__func__, res);
 }
 

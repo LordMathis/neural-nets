@@ -2,6 +2,7 @@
 #define LAYER_H
 
 #include "matrix.h"
+#include "functions.h"
 
 typedef struct
 {
@@ -9,11 +10,11 @@ typedef struct
     Matrix *bias;
     Matrix *neurons;
     Matrix *neurons_act;
-    double (*activation_fn)(double);
+    Activation *activation;
     int num_neurons;
 } Layer;
 
-Layer* create_layer(int layer_size, int input_size, double (*fn)(double));
+Layer* create_layer(int layer_size, int input_size, Activation *activation);
 int layer_compute(Layer *layer, Matrix *input);
 int delete_layer(Layer *layer);
 

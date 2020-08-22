@@ -2,12 +2,8 @@
 #include "test_utils.h"
 #include "../lib/layer.h"
 #include "../lib/matrix.h"
+#include "../lib/functions.h"
 #include <stdbool.h>
-
-static double activate(double x)
-{
-    return x;
-}
 
 static int test_create_layer()
 {
@@ -17,9 +13,8 @@ static int test_create_layer()
     int layer_size = 20;
     int input_size = 30;
 
-    double (*act)(double) = &activate;
-
-    Layer *layer = create_layer(layer_size, input_size, act);
+    Activation *sigmoid = create_sigmoid_activation();
+    Layer *layer = create_layer(layer_size, input_size, sigmoid);
 
     //Tests
     if (layer->num_neurons != layer_size)
@@ -27,7 +22,7 @@ static int test_create_layer()
         res+=fail(__func__, "Wrong layer size");
     }
 
-    if (layer->activation_fn != act)
+    if (layer->activation != sigmoid)
     {
         res+=fail(__func__, "Wrong layer activation function");
     }
@@ -62,6 +57,7 @@ static int test_create_layer()
 
     // Cleanup
     delete_layer(layer);
+    delete_activation(sigmoid);
     return eval_test_result(__func__, res);
 }
 
@@ -72,9 +68,8 @@ int test_layer_compute()
     int layer_size = 30;
     int input_size = 10;
 
-    double (*act)(double) = &activate;
-
-    Layer *layer = create_layer(layer_size, input_size, act);
+    Activation *sigmoid = create_sigmoid_activation();
+    Layer *layer = create_layer(layer_size, input_size, sigmoid);
 
     double mat[10][1] = {{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}};
     Matrix *input = create_matrix(input_size, 1, mat);
@@ -94,6 +89,7 @@ int test_layer_compute()
         // Cleanup
     delete_layer(layer);
     delete(input);
+    delete_activation(sigmoid);
     return eval_test_result(__func__, res);
 }
 

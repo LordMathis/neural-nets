@@ -1,5 +1,6 @@
 #include "layer.h"
 #include "matrix.h"
+#include "functions.h"
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
@@ -7,12 +8,12 @@
 
 static int init_layer(Layer *layer);
 
-Layer* create_layer(int layer_size, int input_size, double (*fn)(double))
+Layer* create_layer(int layer_size, int input_size, Activation *activation)
 {
     Layer *layer = (Layer *) malloc (sizeof (Layer));
 
     layer->num_neurons = layer_size;
-    layer->activation_fn = fn;
+    layer->activation = activation;
 
     layer->weights = create_matrix(input_size, layer_size, NULL);
     layer->bias = create_matrix(layer_size, 1, NULL);
@@ -52,7 +53,7 @@ int layer_compute(Layer *layer, Matrix *input)
 {
     multiply(layer->weights, input, layer->neurons);
     add(layer->neurons, layer->bias);
-    apply(layer->neurons, layer->neurons_act, layer->activation_fn);
+    apply(layer->neurons, layer->neurons_act, layer->activation->fn);
 
     return 0;
 }
