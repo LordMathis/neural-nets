@@ -308,6 +308,58 @@ static int test_add()
     return eval_test_result(__func__, res);
 }
 
+static int test_subtract()
+{
+    // Setup
+    int res = 0;
+
+    int rows = 3;
+    int cols = 2;
+    const double a_mat[3][2] = {{2,1}, {3,2}, {5,3}};
+    Matrix *a_matrix = create_matrix(rows, cols, a_mat);
+
+    const double b_mat[3][2] = {{5,0}, {4,3}, {4,1}};
+    Matrix *b_matrix = create_matrix(rows, cols, b_mat);
+
+    int c_rows = 4;
+    int c_cols = 5;
+    Matrix *c_matrix = create_matrix(c_rows, c_cols, NULL);
+
+    // Test add wrong dimensions
+    int res_wrong_dims = subtract(a_matrix, c_matrix);
+    if (res_wrong_dims != -1)
+    {
+        res+=fail(__func__, "Subtraction of mismatched dimension matrices should not be possible");
+    }
+
+    // Test add correct dimensions
+    const double res_mat[3][2] = {
+        {-3.00, 1.00 },
+        {-1.00, -1.00 },
+        {1.00, 2.00 }
+    };
+
+    subtract(a_matrix, b_matrix);
+
+    if (is_null(a_matrix))
+    {
+        res+=fail(__func__, "Matrix should not be null");
+    }
+
+    if (!is_equal(a_matrix, rows, cols, res_mat))
+    {
+        res+=fail(__func__, "Wrong matrix dimensions or values");
+    }
+
+    // Cleanup
+    delete(a_matrix);
+    delete(b_matrix);
+    delete(c_matrix);
+   
+    return eval_test_result(__func__, res);
+}
+
+
 static double square(double num)
 {
     return num*num;
@@ -345,6 +397,65 @@ static int test_apply()
     return eval_test_result(__func__, res);
 }
 
+static int test_hadamard()
+{
+    // Setup
+    int res = 0;
+
+    int a_rows = 3;
+    int a_cols = 2;
+    const double a_mat[3][2] = {{2,1}, {3,2}, {5,3}};
+    Matrix *a_matrix = create_matrix(a_rows, a_cols, a_mat);
+
+    int b_rows = 3;
+    int b_cols = 2;
+    const double b_mat[3][2] = {{5,0}, {3,4}, {1,7}};
+    Matrix *b_matrix = create_matrix(b_rows, b_cols, b_mat);
+
+    int c_rows = 4;
+    int c_cols = 5;
+    Matrix *c_matrix = create_matrix(c_rows, c_cols, NULL);
+
+    // Test multiply wrong dimensions
+    Matrix *res_wrong_dims_mat = create_matrix(a_cols, c_rows, NULL);
+    int res_wrong_dims = hadamard(a_matrix, c_matrix, res_wrong_dims_mat);
+    if (res_wrong_dims != -1)
+    {
+        res+=fail(__func__, "Mismatched dimension should not be multiplied");
+    }
+
+    // Test multiply correct dimensions
+    int res_rows = 3;
+    int res_cols = 2;
+    const double res_mat[3][2] = {
+        {10.00, 0.00},
+        {9.00, 8.00},
+        {5.00, 21.00}
+    };
+
+    Matrix *res_matrix = create_matrix(res_rows, res_cols, NULL);
+    hadamard(a_matrix, b_matrix, res_matrix);
+
+    if (is_null(res_matrix))
+    {
+        res+=fail(__func__, "Matrix should not be null");
+    }
+
+    if (!is_equal(res_matrix, res_rows, res_cols, res_mat))
+    {
+        res+=fail(__func__, "Wrong matrix dimensions or values");
+    }
+
+    // Cleanup
+    delete(a_matrix);
+    delete(b_matrix);
+    delete(c_matrix);
+    delete(res_wrong_dims_mat);
+    delete(res_matrix);
+   
+    return eval_test_result(__func__, res);
+}
+
 int test_matrix()
 {
     int res = 0;
@@ -355,7 +466,9 @@ int test_matrix()
     res += test_scalar_multiply();
     res += test_scalar_add();
     res += test_add();
+    res += test_subtract();
     res += test_apply();
+    res += test_hadamard();
 
     return res;
 }

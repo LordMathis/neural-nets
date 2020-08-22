@@ -9,7 +9,7 @@ int main()
     res += test_network();
     res += test_functions();
 
-    eval_test_result("All tests passed!", res);
+    eval_test_result("All tests finished!", res);
 
     return 0;
 }
