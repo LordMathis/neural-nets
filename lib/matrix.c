@@ -90,7 +90,8 @@ int multiply(Matrix *a, Matrix *b, Matrix *result)
     return 0;
 }
 
-int add(Matrix *a, Matrix *b) {
+int add(Matrix *a, Matrix *b)
+{
     if (is_null(a) || is_null(b))
     {
         return -1;
@@ -106,6 +107,29 @@ int add(Matrix *a, Matrix *b) {
         for (int j = 0; j < a->cols; j++)
         {
             a->matrix[i][j] += b->matrix[i][j];
+        }        
+    }
+
+    return 0;
+}
+
+int subtract(Matrix *a, Matrix *b)
+{
+    if (is_null(a) || is_null(b))
+    {
+        return -1;
+    }
+
+    if (a->rows != b->rows || a->cols != b->cols)
+    {
+        return -1;
+    }
+
+    for (int i = 0; i < a->rows; i++)
+    {
+        for (int j = 0; j < a->cols; j++)
+        {
+            a->matrix[i][j] -= b->matrix[i][j];
         }        
     }
 
