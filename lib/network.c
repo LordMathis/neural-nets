@@ -49,7 +49,7 @@ Matrix* predict(Network *network, Matrix *input)
 
 int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int dataset_size)
 {
-    // Set up deltas and temp deltas
+    // Allocate all the memory
     Matrix **delta_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
     Matrix **temp_delta_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
 
@@ -57,6 +57,9 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
     Matrix **temp_delta_bias = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
 
     Matrix **deltas = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
+
+    Matrix **temp_deltas = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers -1);
+    Matrix **transposed_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers - 1);
 
     for (int i = 0; i < network->num_layers; i++)
     {
@@ -66,13 +69,23 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
         delta_weights[i] = create_matrix(rows, cols, NULL);
         temp_delta_weights[i] = create_matrix(rows, cols, NULL);
 
-        rows = network->layers[i]->bias->rows;
-        cols = network->layers[i]->bias->cols;
+        if (i>0)
+        {
+            transposed_weights[i-1] = create_matrix(cols, rows, NULL);
+        }
 
-        delta_bias[i] = create_matrix(rows, cols, NULL);
-        temp_delta_bias[i] = create_matrix(rows, cols, NULL);
+        int bias_rows = network->layers[i]->bias->rows;
+        int bias_cols = network->layers[i]->bias->cols;
 
-        deltas[i] = create_matrix(rows, cols, NULL);
+        delta_bias[i] = create_matrix(bias_rows, bias_cols, NULL);
+        temp_delta_bias[i] = create_matrix(bias_rows, bias_cols, NULL);
+
+        deltas[i] = create_matrix(bias_rows, bias_cols, NULL);
+
+        if (i>0)
+        {
+            temp_deltas[i-1] = create_matrix(cols, bias_cols, NULL);
+        }
     }
 
     Matrix *prediction;
@@ -97,6 +110,27 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
 
         // Update delta biases
         add(delta_bias[network->num_layers - 1], deltas[last_layer_idx]);
+
+        Layer *layer;
+        Layer *prev_layer;
+        for (int i = network->num_layers - 2; i >= 0; i--)
+        {
+            layer = network->layers[i];
+            prev_layer = network->layers[i+1];
+
+            // Compute new delta
+            transpose(prev_layer->weights, transposed_weights[i]);
+            apply(layer->neurons, NULL, layer->activation->fn_der);
+            multiply(transposed_weights[i], deltas[i+1], temp_deltas[i]);
+            hadamard(temp_deltas[i], layer->neurons, deltas[i+1]);
+
+            // Compute delta weights
+            multiply(deltas[i+1], layer->neurons_act, temp_delta_weights[i]);
+            add(delta_weights[i], temp_delta_weights[i]);
+
+            // Compute delta bias
+            add(delta_bias[i], deltas[i+1]);
+        }      
     }
     
 
@@ -107,11 +141,13 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
         delete(delta_bias[i]);
         delete(temp_delta_weights[i]);
         delete(temp_delta_bias[i]);
-        delete(deltas);
+        delete(transposed_weights[i]);
+        delete(deltas[i]);
     }
     free(delta_weights);
     free(delta_bias);
     free(temp_delta_weights);
     free(temp_delta_bias);
+    free(transposed_weights);
     free(deltas);
 }
