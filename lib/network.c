@@ -1,8 +1,9 @@
 #include "layer.h"
 #include "matrix.h"
 #include "network.h"
+#include "utils.h"
 #include <stdlib.h>
-
+#include <stdio.h>
 
 Network* create_network(int input_size, int num_layers, int layers[], Activation *activation)
 {
@@ -94,42 +95,86 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
     int last_layer_idx =  network->num_layers - 1;
     Layer *last_layer = network->layers[last_layer_idx];
 
+    int res = 0;
+
     for (int i = 0; i < dataset_size; i++)
     {
         prediction = predict(network, input_dataset[i]);
         target = input_labels[i];
 
+        if (predict == NULL)
+        {
+            log_info(__func__, "Something went wrong during prediction");
+            return -1;
+        }
+
         // Calculate delta
-        subtract(prediction, target);
-        apply(last_layer->neurons, NULL, last_layer->activation->fn_der);
-        hadamard(prediction, last_layer->neurons, deltas[last_layer_idx]);
+        res = 0;
+        res += subtract(prediction, target);
+        res += apply(last_layer->neurons, NULL, last_layer->activation->fn_der);
+        res += hadamard(prediction, last_layer->neurons, deltas[last_layer_idx]);
+        if (res < 0)
+        {
+            log_info(__func__, "Something went wrong during output delta calculation");
+            return res;
+        }
 
         // Update delta weights
-        multiply(deltas[last_layer_idx], last_layer->neurons_act, temp_delta_weights[last_layer_idx]);
-        add(delta_weights[network->num_layers - 1], temp_delta_weights[last_layer_idx]);
+        res = 0;
+        res += multiply(deltas[last_layer_idx], network->layers[i]->neurons_act, temp_delta_weights[last_layer_idx]);
+        res += add(delta_weights[network->num_layers - 1], temp_delta_weights[last_layer_idx]);
+        if (res < 0)
+        {
+            log_info(__func__, "Something went wrong during output delta weights calculation");
+            return res;
+        }
 
         // Update delta biases
-        add(delta_bias[network->num_layers - 1], deltas[last_layer_idx]);
+        res = add(delta_bias[network->num_layers - 1], deltas[last_layer_idx]);
+        if (res < 0)
+        {
+            log_info(__func__, "Something went wrong during output delta bias calculation");
+            return res;
+        }
 
         Layer *layer;
         Layer *prev_layer;
+
         for (int i = network->num_layers - 2; i >= 0; i--)
         {
             layer = network->layers[i];
             prev_layer = network->layers[i+1];
 
             // Compute new delta
-            transpose(prev_layer->weights, transposed_weights[i]);
-            apply(layer->neurons, NULL, layer->activation->fn_der);
-            multiply(transposed_weights[i], deltas[i+1], temp_deltas[i]);
-            hadamard(temp_deltas[i], layer->neurons, deltas[i+1]);
+            res = 0;
+            res += transpose(prev_layer->weights, transposed_weights[i]);
+            res += apply(layer->neurons, NULL, layer->activation->fn_der);
+            res += multiply(transposed_weights[i], deltas[i+1], temp_deltas[i]);
+            res += hadamard(temp_deltas[i], layer->neurons, deltas[i+1]);
+            if (res < 0)
+            {
+                log_info(__func__, "Something went wrong during delta calculation");
+                return res;
+            }
 
             // Compute delta weights
-            multiply(deltas[i+1], layer->neurons_act, temp_delta_weights[i]);
-            add(delta_weights[i], temp_delta_weights[i]);
+            res = 0;
+            res += multiply(deltas[i+1], layer->neurons_act, temp_delta_weights[i]);
+            res += add(delta_weights[i], temp_delta_weights[i]);
+            if (res < 0)
+            {
+                log_info(__func__, "Something went wrong during delta weights calculation");
+                return res;
+            }
+
 
             // Compute delta bias
-            add(delta_bias[i], deltas[i+1]);
+            res = add(delta_bias[i], deltas[i+1]);
+            if (res < 0)
+            {
+                log_info(__func__, "Something went wrong during delta bias calculation");
+                return res;
+            }
         }      
     }
     
