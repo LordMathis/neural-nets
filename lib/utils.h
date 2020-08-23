@@ -1,0 +1,1 @@
+void log_info(const char *function_name, const char *message);
