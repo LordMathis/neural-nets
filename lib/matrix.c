@@ -44,6 +44,16 @@ void print_matrix(Matrix *matrix)
     }    
 }
 
+bool is_null(Matrix *a)
+{
+    if (a == NULL || a->matrix == NULL)
+    {
+        return true;
+    }
+
+    return false;
+}
+
 int transpose(Matrix *a, Matrix *result)
 {
     if (is_null(a) || is_null(result))
@@ -64,7 +74,6 @@ int transpose(Matrix *a, Matrix *result)
 
 int multiply(Matrix *a, Matrix *b, Matrix *result)
 {
-
     if (is_null(a) || is_null(b) || is_null(result))
     {
         return -1;
@@ -83,6 +92,33 @@ int multiply(Matrix *a, Matrix *b, Matrix *result)
             for (int k = 0; k < a->cols; k++)
             {
                 result->matrix[i][j] += a->matrix[i][k] * b->matrix[k][j];
+            }            
+        }        
+    }
+
+    return 0;
+}
+
+int multiply_transposed(Matrix *a, Matrix *b_t, Matrix *result)
+{
+    if (is_null(a) || is_null(b_t) || is_null(result))
+    {
+        return -1;
+    }
+
+    if (a->cols != b_t->cols || a->rows != result->rows || b_t->rows != result->cols)
+    {
+        return -1;
+    }
+
+    for (int i = 0; i < a->rows; i++)
+    {
+        for (int j = 0; j < b_t->rows; j++)
+        {
+            result->matrix[i][j] = 0;
+            for (int k = 0; k < a->cols; k++)
+            {
+                result->matrix[i][j] += a->matrix[i][k] * b_t->matrix[j][k];
             }            
         }        
     }
@@ -224,16 +260,6 @@ int hadamard(Matrix *a, Matrix *b, Matrix *result)
     }
 
     return 0;    
-}
-
-int is_null(Matrix *a)
-{
-    if (a == NULL || a->matrix == NULL)
-    {
-        return true;
-    }
-
-    return false;
 }
 
 int delete(Matrix *a)
