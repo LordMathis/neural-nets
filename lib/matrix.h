@@ -22,6 +22,7 @@ int scalar_multiply(Matrix *matrix, double a);
 int scalar_add(Matrix *matrix, double a);
 int apply(Matrix *a, Matrix *result, double (*fn)(double));
 int hadamard(Matrix *a, Matrix *b, Matrix *result);
+int reset_matrix(Matrix *a);
 int delete(Matrix *a);
 
 #endif /* MATRIX_H */

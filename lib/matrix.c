@@ -262,6 +262,24 @@ int hadamard(Matrix *a, Matrix *b, Matrix *result)
     return 0;    
 }
 
+int reset_matrix(Matrix *a)
+{
+    if (is_null(a))
+    {
+        return -1;
+    }
+
+    for (int i = 0; i < a->rows; i++)
+    {
+        for (int j = 0; j < a->cols; j++)
+        {
+            a->matrix[i][j] = 0;
+        }        
+    }
+
+    return 0;    
+}
+
 int delete(Matrix *a)
 {
     if (is_null(a))

@@ -98,47 +98,62 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
 
     int res = 0;
 
-    for (int i = 0; i < dataset_size; i++)
-    {
-        prediction = predict(network, input_dataset[i]);
-        target = input_labels[i];
+    while (true) {
 
-        if (predict == NULL)
+        for (int i = 0; i < dataset_size; i++)
         {
-            log_info(__func__, "Something went wrong during prediction");
-            return -1;
+            prediction = predict(network, input_dataset[i]);
+            target = input_labels[i];
+
+            if (predict == NULL)
+            {
+                log_info(__func__, "Something went wrong during prediction");
+                return -1;
+            }
+
+            // Calculate initial delta
+            res = 0;
+            res += subtract(prediction, target);
+            res += apply(last_layer->neurons, NULL, last_layer->activation->fn_der);
+            res += hadamard(prediction, last_layer->neurons, deltas[last_layer_idx]);
+            if (res < 0)
+            {
+                log_info(__func__, "Something went wrong during output delta calculation");
+                return res;
+            }
+
+            // Update delta weights
+            res = 0;
+            res += multiply_transposed(deltas[last_layer_idx], network->layers[last_layer_idx - 1]->neurons_act, temp_delta_weights[last_layer_idx]);
+            res += add(delta_weights[network->num_layers - 1], temp_delta_weights[last_layer_idx]);
+            if (res < 0)
+            {
+                log_info(__func__, "Something went wrong during output delta weights calculation");
+                return res;
+            }
+
+            // Update delta biases
+            res = add(delta_bias[network->num_layers - 1], deltas[last_layer_idx]);
+            if (res < 0)
+            {
+                log_info(__func__, "Something went wrong during output delta bias calculation");
+                return res;
+            }
+
+            backpropagate(
+                network,
+                deltas,
+                temp_deltas,
+                delta_weights,
+                temp_delta_weights,
+                transposed_weights,
+                delta_bias
+            );
         }
 
-        // Calculate initial delta
-        res = 0;
-        res += subtract(prediction, target);
-        res += apply(last_layer->neurons, NULL, last_layer->activation->fn_der);
-        res += hadamard(prediction, last_layer->neurons, deltas[last_layer_idx]);
-        if (res < 0)
-        {
-            log_info(__func__, "Something went wrong during output delta calculation");
-            return res;
-        }
+        // TODO: Adjust weights
 
-        // Update delta weights
-        res = 0;
-        res += multiply_transposed(deltas[last_layer_idx], network->layers[last_layer_idx - 1]->neurons_act, temp_delta_weights[last_layer_idx]);
-        res += add(delta_weights[network->num_layers - 1], temp_delta_weights[last_layer_idx]);
-        if (res < 0)
-        {
-            log_info(__func__, "Something went wrong during output delta weights calculation");
-            return res;
-        }
-
-        // Update delta biases
-        res = add(delta_bias[network->num_layers - 1], deltas[last_layer_idx]);
-        if (res < 0)
-        {
-            log_info(__func__, "Something went wrong during output delta bias calculation");
-            return res;
-        }
-
-        backpropagate(
+        reset(
             network,
             deltas,
             temp_deltas,
@@ -147,8 +162,9 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
             transposed_weights,
             delta_bias
         );
+        
+        break;    
     }
-    
 
     cleanup(
         network->num_layers,
@@ -239,4 +255,34 @@ static void cleanup(
     free(temp_delta_weights);
     free(transposed_weights);
     free(delta_bias);
+}
+
+static int reset(
+    Network *network,
+    Matrix **deltas,
+    Matrix **temp_deltas,
+    Matrix **delta_weights,
+    Matrix **temp_delta_weights,
+    Matrix **transposed_weights,
+    Matrix **delta_bias)
+{
+    int res = 0;
+    for (int i = 0; i < network->num_layers; i++)
+    {
+        res += reset_matrix(deltas[i]);
+        res += reset_matrix(delta_weights[i]);
+        res += reset_matrix(temp_delta_weights[i]);
+        res += reset_matrix(delta_bias[i]);
+
+        if (i != network->num_layers - 1) {
+            res += reset_matrix(transposed_weights[i]);
+            res += reset_matrix(temp_deltas[i]);
+        }
+
+        if (i != 0)
+        {
+            transpose(network->layers[i]->weights, transposed_weights[i-1]);
+        }
+    }
+    
 }
