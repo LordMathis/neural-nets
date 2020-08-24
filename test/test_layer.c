@@ -32,7 +32,7 @@ static int test_create_layer()
         res+=fail(__func__, "Layer cannot be null");
     }
 
-    if (layer->weights->rows != input_size || layer->weights->cols != layer_size)
+    if (layer->weights->rows != layer_size || layer->weights->cols != input_size)
     {
         res+=fail(__func__, "Wrong weight matrix dimensions");
     }
