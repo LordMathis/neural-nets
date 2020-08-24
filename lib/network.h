@@ -20,4 +20,25 @@ static int backpropagate(
     Matrix **delta_weights,
     Matrix **temp_delta_weights,
     Matrix **transposed_weights,
-    Matrix **delta_bias);
+    Matrix **delta_bias
+);
+
+static void cleanup(
+    int network_length,
+    Matrix **deltas,
+    Matrix **temp_deltas,
+    Matrix **delta_weights,
+    Matrix **temp_delta_weights,
+    Matrix **transposed_weights,
+    Matrix **delta_bias
+);
+
+static int reset(
+    Network *network,
+    Matrix **deltas,
+    Matrix **temp_deltas,
+    Matrix **delta_weights,
+    Matrix **temp_delta_weights,
+    Matrix **transposed_weights,
+    Matrix **delta_bias
+);
