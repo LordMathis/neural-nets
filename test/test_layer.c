@@ -74,7 +74,10 @@ int test_layer_compute()
     double mat[10][1] = {{1}, {2}, {3}, {4}, {5}, {6}, {7}, {8}, {9}, {10}};
     Matrix *input = create_matrix(input_size, 1, mat);
 
-    layer_compute(layer, input);
+    if (layer_compute(layer, input) < 0)
+    {
+        res+=fail(__func__, "Layer compute failed");
+    }
 
     if (is_null(layer->neurons_act))
     {

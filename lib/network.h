@@ -12,3 +12,12 @@ Network* create_network(int input_size, int num_layers, int layers[], Activation
 int delete_network(Network *network);
 Matrix* predict(Network *network, Matrix *input);
 int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int dataset_size);
+
+static int backpropagate(
+    Network *network,
+    Matrix **deltas,
+    Matrix **temp_deltas,
+    Matrix **delta_weights,
+    Matrix **temp_delta_weights,
+    Matrix **transposed_weights,
+    Matrix **delta_bias);

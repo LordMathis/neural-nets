@@ -41,7 +41,10 @@ Matrix* predict(Network *network, Matrix *input)
     for (int i = 0; i < network->num_layers; i++)
     {
         Layer *layer = network->layers[i];
-        layer_compute(layer, layer_input);
+        if (layer_compute(layer, layer_input) < 0)
+        {
+            log_info(__func__, "Something went wrong during prediction");
+        }
         layer_input = layer->neurons_act;
     }
     
@@ -55,7 +58,6 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
     Matrix **temp_delta_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
 
     Matrix **delta_bias = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
-    Matrix **temp_delta_bias = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
 
     Matrix **deltas = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
 
@@ -73,14 +75,13 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
         if (i>0)
         {
             transposed_weights[i-1] = create_matrix(cols, rows, NULL);
+            transpose(network->layers[i]->weights, transposed_weights[i-1]);
         }
 
         int bias_rows = network->layers[i]->bias->rows;
         int bias_cols = network->layers[i]->bias->cols;
 
         delta_bias[i] = create_matrix(bias_rows, bias_cols, NULL);
-        temp_delta_bias[i] = create_matrix(bias_rows, bias_cols, NULL);
-
         deltas[i] = create_matrix(bias_rows, bias_cols, NULL);
 
         if (i>0)
@@ -108,7 +109,7 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
             return -1;
         }
 
-        // Calculate delta
+        // Calculate initial delta
         res = 0;
         res += subtract(prediction, target);
         res += apply(last_layer->neurons, NULL, last_layer->activation->fn_der);
@@ -121,7 +122,7 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
 
         // Update delta weights
         res = 0;
-        res += multiply(deltas[last_layer_idx], network->layers[i]->neurons_act, temp_delta_weights[last_layer_idx]);
+        res += multiply_transposed(deltas[last_layer_idx], network->layers[last_layer_idx - 1]->neurons_act, temp_delta_weights[last_layer_idx]);
         res += add(delta_weights[network->num_layers - 1], temp_delta_weights[last_layer_idx]);
         if (res < 0)
         {
@@ -137,62 +138,105 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
             return res;
         }
 
-        Layer *layer;
-        Layer *prev_layer;
-
-        for (int i = network->num_layers - 2; i >= 0; i--)
-        {
-            layer = network->layers[i];
-            prev_layer = network->layers[i+1];
-
-            // Compute new delta
-            res = 0;
-            res += transpose(prev_layer->weights, transposed_weights[i]);
-            res += apply(layer->neurons, NULL, layer->activation->fn_der);
-            res += multiply(transposed_weights[i], deltas[i+1], temp_deltas[i]);
-            res += hadamard(temp_deltas[i], layer->neurons, deltas[i+1]);
-            if (res < 0)
-            {
-                log_info(__func__, "Something went wrong during delta calculation");
-                return res;
-            }
-
-            // Compute delta weights
-            res = 0;
-            res += multiply(deltas[i+1], layer->neurons_act, temp_delta_weights[i]);
-            res += add(delta_weights[i], temp_delta_weights[i]);
-            if (res < 0)
-            {
-                log_info(__func__, "Something went wrong during delta weights calculation");
-                return res;
-            }
-
-
-            // Compute delta bias
-            res = add(delta_bias[i], deltas[i+1]);
-            if (res < 0)
-            {
-                log_info(__func__, "Something went wrong during delta bias calculation");
-                return res;
-            }
-        }      
+        backpropagate(
+            network,
+            deltas,
+            temp_deltas,
+            delta_weights,
+            temp_delta_weights,
+            transposed_weights,
+            delta_bias
+        );
     }
     
 
-    // Cleanup
-    for (int i = 0; i < network->num_layers; i++)
+    cleanup(
+        network->num_layers,
+        deltas,
+        temp_deltas,
+        delta_weights,
+        temp_delta_weights,
+        transposed_weights,
+        delta_bias
+    );
+}
+
+static int backpropagate(
+    Network *network,
+    Matrix **deltas,
+    Matrix **temp_deltas,
+    Matrix **delta_weights,
+    Matrix **temp_delta_weights,
+    Matrix **transposed_weights,
+    Matrix **delta_bias)
+{
+    int res;
+    Layer *layer;
+    Layer *prev_layer;
+
+    for (int i = network->num_layers - 2; i >= 0; i--)
     {
-        delete(delta_weights[i]);
-        delete(delta_bias[i]);
-        delete(temp_delta_weights[i]);
-        delete(temp_delta_bias[i]);
-        delete(transposed_weights[i]);
+        layer = network->layers[i];
+        prev_layer = network->layers[i+1];
+
+        // Compute new delta
+        res = 0;
+        res += apply(layer->neurons, NULL, layer->activation->fn_der);
+        res += multiply(transposed_weights[i], deltas[i+1], temp_deltas[i]);
+        res += hadamard(temp_deltas[i], layer->neurons, deltas[i]);
+        if (res < 0)
+        {
+            log_info(__func__, "Something went wrong during delta calculation");
+            return res;
+        }
+
+        // Compute delta weights
+        res = 0;
+        res += multiply_transposed(deltas[i], layer->neurons_act, temp_delta_weights[i]);
+        res += add(delta_weights[i], temp_delta_weights[i]);
+        if (res < 0)
+        {
+            log_info(__func__, "Something went wrong during delta weights calculation");
+            return res;
+        }
+
+
+        // Compute delta bias
+        res = add(delta_bias[i], deltas[i]);
+        if (res < 0)
+        {
+            log_info(__func__, "Something went wrong during delta bias calculation");
+            return res;
+        }
+    }      
+}
+
+static void cleanup(
+    int network_length,
+    Matrix **deltas,
+    Matrix **temp_deltas,
+    Matrix **delta_weights,
+    Matrix **temp_delta_weights,
+    Matrix **transposed_weights,
+    Matrix **delta_bias)
+{
+        // Cleanup
+    for (int i = 0; i < network_length; i++)
+    {
         delete(deltas[i]);
+        delete(delta_weights[i]);
+        delete(temp_delta_weights[i]);
+        delete(delta_bias[i]);
+
+        if (i != network_length - 1) {
+            delete(transposed_weights[i]);
+            delete(temp_deltas[i]);
+        }
     }
-    free(delta_weights);
-    free(delta_bias);
-    free(temp_delta_weights);
-    free(temp_delta_bias);
-    free(transposed_weights);
     free(deltas);
+    free(temp_deltas);
+    free(delta_weights);
+    free(temp_delta_weights);
+    free(transposed_weights);
+    free(delta_bias);
 }
