@@ -52,116 +52,6 @@ Matrix* predict(Network *network, Matrix *input)
     return layer_input;
 }
 
-int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int dataset_size)
-{
-    // Allocate all the memory
-    Matrix **delta_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
-    Matrix **temp_delta_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
-
-    Matrix **delta_bias = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
-
-    Matrix **deltas = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
-
-    Matrix **temp_deltas = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers -1);
-    Matrix **transposed_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers - 1);
-
-    init_training(
-        network,
-        deltas,
-        temp_deltas,
-        delta_weights,
-        temp_delta_weights,
-        transposed_weights,
-        delta_bias
-    );
-
-    Matrix *prediction;
-    Matrix *target;
-
-    int last_layer_idx =  network->num_layers - 1;
-    Layer *last_layer = network->layers[last_layer_idx];
-
-    int res = 0;
-
-    while (true) {
-
-        for (int i = 0; i < dataset_size; i++)
-        {
-            prediction = predict(network, input_dataset[i]);
-            target = input_labels[i];
-
-            if (predict == NULL)
-            {
-                log_exception(__func__, "Exception during prediction");
-                return -1;
-            }
-
-            // Calculate initial delta
-            res = 0;
-            res += subtract(prediction, target);
-            res += apply(last_layer->neurons, NULL, last_layer->activation->fn_der);
-            res += hadamard(prediction, last_layer->neurons, deltas[last_layer_idx]);
-            if (res < 0)
-            {
-                log_exception(__func__, "Exception during output delta calculation");
-                return res;
-            }
-
-            // Update delta weights
-            res = 0;
-            res += multiply_transposed(deltas[last_layer_idx], network->layers[last_layer_idx - 1]->neurons_act, temp_delta_weights[last_layer_idx]);
-            res += add(delta_weights[network->num_layers - 1], temp_delta_weights[last_layer_idx]);
-            if (res < 0)
-            {
-                log_exception(__func__, "Exception during output delta weights calculation");
-                return res;
-            }
-
-            // Update delta biases
-            res = add(delta_bias[network->num_layers - 1], deltas[last_layer_idx]);
-            if (res < 0)
-            {
-                log_exception(__func__, "Exception during output delta bias calculation");
-                return res;
-            }
-
-            backpropagate(
-                network,
-                deltas,
-                temp_deltas,
-                delta_weights,
-                temp_delta_weights,
-                transposed_weights,
-                delta_bias
-            );
-        }
-
-        // TODO: Adjust weights
-
-        reset(
-            network,
-            deltas,
-            temp_deltas,
-            delta_weights,
-            temp_delta_weights,
-            transposed_weights,
-            delta_bias
-        );
-        
-        break;    
-    }
-
-    cleanup(
-        network->num_layers,
-        deltas,
-        temp_deltas,
-        delta_weights,
-        temp_delta_weights,
-        transposed_weights,
-        delta_bias
-    );
-}
-
 static int init_training(
     Network *network,
     Matrix **deltas,
@@ -313,4 +203,114 @@ static int reset(
             return res;
         }
     }    
+}
+
+int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int dataset_size)
+{
+    // Allocate all the memory
+    Matrix **delta_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
+    Matrix **temp_delta_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
+
+    Matrix **delta_bias = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
+
+    Matrix **deltas = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
+
+    Matrix **temp_deltas = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers -1);
+    Matrix **transposed_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers - 1);
+
+    init_training(
+        network,
+        deltas,
+        temp_deltas,
+        delta_weights,
+        temp_delta_weights,
+        transposed_weights,
+        delta_bias
+    );
+
+    Matrix *prediction;
+    Matrix *target;
+
+    int last_layer_idx =  network->num_layers - 1;
+    Layer *last_layer = network->layers[last_layer_idx];
+
+    int res = 0;
+
+    while (true) {
+
+        for (int i = 0; i < dataset_size; i++)
+        {
+            prediction = predict(network, input_dataset[i]);
+            target = input_labels[i];
+
+            if (predict == NULL)
+            {
+                log_exception(__func__, "Exception during prediction");
+                return -1;
+            }
+
+            // Calculate initial delta
+            res = 0;
+            res += subtract(prediction, target);
+            res += apply(last_layer->neurons, NULL, last_layer->activation->fn_der);
+            res += hadamard(prediction, last_layer->neurons, deltas[last_layer_idx]);
+            if (res < 0)
+            {
+                log_exception(__func__, "Exception during output delta calculation");
+                return res;
+            }
+
+            // Update delta weights
+            res = 0;
+            res += multiply_transposed(deltas[last_layer_idx], network->layers[last_layer_idx - 1]->neurons_act, temp_delta_weights[last_layer_idx]);
+            res += add(delta_weights[network->num_layers - 1], temp_delta_weights[last_layer_idx]);
+            if (res < 0)
+            {
+                log_exception(__func__, "Exception during output delta weights calculation");
+                return res;
+            }
+
+            // Update delta biases
+            res = add(delta_bias[network->num_layers - 1], deltas[last_layer_idx]);
+            if (res < 0)
+            {
+                log_exception(__func__, "Exception during output delta bias calculation");
+                return res;
+            }
+
+            backpropagate(
+                network,
+                deltas,
+                temp_deltas,
+                delta_weights,
+                temp_delta_weights,
+                transposed_weights,
+                delta_bias
+            );
+        }
+
+        // TODO: Adjust weights
+
+        reset(
+            network,
+            deltas,
+            temp_deltas,
+            delta_weights,
+            temp_delta_weights,
+            transposed_weights,
+            delta_bias
+        );
+        
+        break;    
+    }
+
+    cleanup(
+        network->num_layers,
+        deltas,
+        temp_deltas,
+        delta_weights,
+        temp_delta_weights,
+        transposed_weights,
+        delta_bias
+    );
 }
