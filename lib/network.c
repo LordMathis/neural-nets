@@ -41,9 +41,10 @@ Matrix* predict(Network *network, Matrix *input)
     for (int i = 0; i < network->num_layers; i++)
     {
         Layer *layer = network->layers[i];
-        if (layer_compute(layer, layer_input) < 0)
+        int res = layer_compute(layer, layer_input);
+        if (res < 0)
         {
-            log_info(__func__, "Something went wrong during prediction");
+            log_exception(__func__, "Exception during prediction");
         }
         layer_input = layer->neurons_act;
     }
@@ -64,31 +65,15 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
     Matrix **temp_deltas = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers -1);
     Matrix **transposed_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers - 1);
 
-    for (int i = 0; i < network->num_layers; i++)
-    {
-        int rows = network->layers[i]->weights->rows;
-        int cols = network->layers[i]->weights->cols;
-
-        delta_weights[i] = create_matrix(rows, cols, NULL);
-        temp_delta_weights[i] = create_matrix(rows, cols, NULL);
-
-        if (i>0)
-        {
-            transposed_weights[i-1] = create_matrix(cols, rows, NULL);
-            transpose(network->layers[i]->weights, transposed_weights[i-1]);
-        }
-
-        int bias_rows = network->layers[i]->bias->rows;
-        int bias_cols = network->layers[i]->bias->cols;
-
-        delta_bias[i] = create_matrix(bias_rows, bias_cols, NULL);
-        deltas[i] = create_matrix(bias_rows, bias_cols, NULL);
-
-        if (i>0)
-        {
-            temp_deltas[i-1] = create_matrix(cols, bias_cols, NULL);
-        }
-    }
+    init_training(
+        network,
+        deltas,
+        temp_deltas,
+        delta_weights,
+        temp_delta_weights,
+        transposed_weights,
+        delta_bias
+    );
 
     Matrix *prediction;
     Matrix *target;
@@ -107,7 +92,7 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
 
             if (predict == NULL)
             {
-                log_info(__func__, "Something went wrong during prediction");
+                log_exception(__func__, "Exception during prediction");
                 return -1;
             }
 
@@ -118,7 +103,7 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
             res += hadamard(prediction, last_layer->neurons, deltas[last_layer_idx]);
             if (res < 0)
             {
-                log_info(__func__, "Something went wrong during output delta calculation");
+                log_exception(__func__, "Exception during output delta calculation");
                 return res;
             }
 
@@ -128,7 +113,7 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
             res += add(delta_weights[network->num_layers - 1], temp_delta_weights[last_layer_idx]);
             if (res < 0)
             {
-                log_info(__func__, "Something went wrong during output delta weights calculation");
+                log_exception(__func__, "Exception during output delta weights calculation");
                 return res;
             }
 
@@ -136,7 +121,7 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
             res = add(delta_bias[network->num_layers - 1], deltas[last_layer_idx]);
             if (res < 0)
             {
-                log_info(__func__, "Something went wrong during output delta bias calculation");
+                log_exception(__func__, "Exception during output delta bias calculation");
                 return res;
             }
 
@@ -177,6 +162,44 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
     );
 }
 
+static int init_training(
+    Network *network,
+    Matrix **deltas,
+    Matrix **temp_deltas,
+    Matrix **delta_weights,
+    Matrix **temp_delta_weights,
+    Matrix **transposed_weights,
+    Matrix **delta_bias)
+{
+    for (int i = 0; i < network->num_layers; i++)
+    {
+        int rows = network->layers[i]->weights->rows;
+        int cols = network->layers[i]->weights->cols;
+
+        delta_weights[i] = create_matrix(rows, cols, NULL);
+        temp_delta_weights[i] = create_matrix(rows, cols, NULL);
+
+        if (i>0)
+        {
+            transposed_weights[i-1] = create_matrix(cols, rows, NULL);
+            transpose(network->layers[i]->weights, transposed_weights[i-1]);
+        }
+
+        int bias_rows = network->layers[i]->bias->rows;
+        int bias_cols = network->layers[i]->bias->cols;
+
+        delta_bias[i] = create_matrix(bias_rows, bias_cols, NULL);
+        deltas[i] = create_matrix(bias_rows, bias_cols, NULL);
+
+        if (i>0)
+        {
+            temp_deltas[i-1] = create_matrix(cols, bias_cols, NULL);
+        }
+    }
+
+    return 0;
+}
+
 static int backpropagate(
     Network *network,
     Matrix **deltas,
@@ -202,7 +225,7 @@ static int backpropagate(
         res += hadamard(temp_deltas[i], layer->neurons, deltas[i]);
         if (res < 0)
         {
-            log_info(__func__, "Something went wrong during delta calculation");
+            log_exception(__func__, "Exception during delta calculation");
             return res;
         }
 
@@ -212,7 +235,7 @@ static int backpropagate(
         res += add(delta_weights[i], temp_delta_weights[i]);
         if (res < 0)
         {
-            log_info(__func__, "Something went wrong during delta weights calculation");
+            log_exception(__func__, "Exception during delta weights calculation");
             return res;
         }
 
@@ -221,7 +244,7 @@ static int backpropagate(
         res = add(delta_bias[i], deltas[i]);
         if (res < 0)
         {
-            log_info(__func__, "Something went wrong during delta bias calculation");
+            log_exception(__func__, "Exception during delta bias calculation");
             return res;
         }
     }      
@@ -281,8 +304,13 @@ static int reset(
 
         if (i != 0)
         {
-            transpose(network->layers[i]->weights, transposed_weights[i-1]);
+            res += transpose(network->layers[i]->weights, transposed_weights[i-1]);
         }
-    }
-    
+
+        if (res < 0)
+        {
+            log_exception(__func__, "Exception during training temp objects reset");
+            return res;
+        }
+    }    
 }

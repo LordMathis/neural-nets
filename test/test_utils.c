@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "test_utils.h"
 #include "../lib/matrix.h"
+#include "../lib/utils.h"
 
 int fail(const char *test_name, const char *message)
 {

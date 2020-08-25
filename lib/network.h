@@ -42,3 +42,13 @@ static int reset(
     Matrix **transposed_weights,
     Matrix **delta_bias
 );
+
+static int init_training(
+    Network *network,
+    Matrix **deltas,
+    Matrix **temp_deltas,
+    Matrix **delta_weights,
+    Matrix **temp_delta_weights,
+    Matrix **transposed_weights,
+    Matrix **delta_bias
+);
