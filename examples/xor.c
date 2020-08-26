@@ -1,12 +1,14 @@
 #include "../lib/network.h"
 #include "../lib/functions.h"
 #include <stdlib.h>
+#include <stdio.h>
 
 int main() {
     int layers[] = {2,1};
 
     Activation *act_sigmoid = create_sigmoid_activation();
     Network *xor_network = create_network(2, 2, layers, act_sigmoid);
+    print_network(xor_network);
 
     Matrix **inputs = (Matrix**) malloc (sizeof (Matrix*) * 4);
     double inputs_mat[4][2][1] = {
@@ -30,6 +32,17 @@ int main() {
         labels[i] = create_matrix(1, 1, labels_mat[i]);
     }
 
-    train(xor_network, inputs, labels, 4);
-    
+    train(xor_network, inputs, labels, 4, 100000, 1);
+
+    printf("Trained network:\n");
+    print_network(xor_network);
+    printf("Test\n");
+
+    for (int i = 0; i < 4; i++)
+    {
+        print_matrix(inputs[i]);
+        Matrix *result = predict(xor_network, inputs[i]);
+        print_matrix(result);
+        printf("\n");
+    }    
 }

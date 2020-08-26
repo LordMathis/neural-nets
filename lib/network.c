@@ -21,6 +21,15 @@ Network* create_network(int input_size, int num_layers, int layers[], Activation
     return network;
 }
 
+void print_network(Network *network)
+{
+    for (int i = 0; i < network->num_layers; i++)
+    {
+        printf("Layer %d\n", i);
+        print_matrix(network->layers[i]->weights);
+    }    
+}
+
 int delete_network(Network *network)
 {
     for (int i = 0; i < network->num_layers; i++)
@@ -92,6 +101,7 @@ static int init_training(
 
 static int backpropagate(
     Network *network,
+    Matrix *input,
     Matrix **deltas,
     Matrix **temp_deltas,
     Matrix **delta_weights,
@@ -101,42 +111,64 @@ static int backpropagate(
 {
     int res;
     Layer *layer;
-    Layer *prev_layer;
+    Matrix *prev_act;
 
-    for (int i = network->num_layers - 2; i >= 0; i--)
+    for (int l = network->num_layers - 2; l >= 0; l--)
     {
-        layer = network->layers[i];
-        prev_layer = network->layers[i+1];
+        layer = network->layers[l];
 
+        if (l == 0)
+        {
+            prev_act = input;
+        }
+        else
+        {
+            prev_act = network->layers[l-1]->neurons_act;
+        }
+        
         // Compute new delta
         res = 0;
         res += apply(layer->neurons, NULL, layer->activation->fn_der);
-        res += multiply(transposed_weights[i], deltas[i+1], temp_deltas[i]);
-        res += hadamard(temp_deltas[i], layer->neurons, deltas[i]);
+        res += multiply(transposed_weights[l], deltas[l+1], temp_deltas[l]); // Transposed weights array is 1 shorter than matrix length
+        res += hadamard(temp_deltas[l], layer->neurons, deltas[l]);
         if (res < 0)
         {
             log_exception(__func__, "Exception during delta calculation");
             return res;
         }
 
+        // printf("Layer %d\n", l);
+        // print_matrix(layer->neurons);
+        // printf("\n");
+        // print_matrix(temp_deltas[l]);
+        // printf("\n");
+        // print_matrix(deltas[l]);
+        // printf("\n");
+
         // Compute delta weights
         res = 0;
-        res += multiply_transposed(deltas[i], layer->neurons_act, temp_delta_weights[i]);
-        res += add(delta_weights[i], temp_delta_weights[i]);
+        res += multiply_transposed(deltas[l], prev_act, temp_delta_weights[l]);
+        res += add(delta_weights[l], temp_delta_weights[l]);
         if (res < 0)
         {
             log_exception(__func__, "Exception during delta weights calculation");
             return res;
         }
 
-
         // Compute delta bias
-        res = add(delta_bias[i], deltas[i]);
+        res = add(delta_bias[l], deltas[l]);
         if (res < 0)
         {
             log_exception(__func__, "Exception during delta bias calculation");
             return res;
         }
+
+        // print_matrix(deltas[l]);
+        // printf("\n");
+        // print_matrix(prev_act);
+        // printf("\n");
+        // print_matrix(temp_delta_weights[l]);
+        // printf("\n");
     }      
 }
 
@@ -205,7 +237,7 @@ static int reset(
     }    
 }
 
-int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int dataset_size)
+int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int dataset_size, int epochs, double learning_rate)
 {
     // Allocate all the memory
     Matrix **delta_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
@@ -231,15 +263,22 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
     Matrix *prediction;
     Matrix *target;
 
-    int last_layer_idx =  network->num_layers - 1;
-    Layer *last_layer = network->layers[last_layer_idx];
+    int L =  network->num_layers - 1;
+    Layer *last_layer = network->layers[L];
 
     int res = 0;
+    int epoch = 0;
 
-    while (true) {
+    while (epoch < epochs) {
+
+        // printf("Epoch: %d/%d\n\n", epoch+1, epochs);
 
         for (int i = 0; i < dataset_size; i++)
         {
+            // printf("Example:\n");
+            // print_matrix(input_dataset[i]);
+            // printf("\n");
+
             prediction = predict(network, input_dataset[i]);
             target = input_labels[i];
 
@@ -253,7 +292,7 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
             res = 0;
             res += subtract(prediction, target);
             res += apply(last_layer->neurons, NULL, last_layer->activation->fn_der);
-            res += hadamard(prediction, last_layer->neurons, deltas[last_layer_idx]);
+            res += hadamard(prediction, last_layer->neurons, deltas[L]);
             if (res < 0)
             {
                 log_exception(__func__, "Exception during output delta calculation");
@@ -262,16 +301,23 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
 
             // Update delta weights
             res = 0;
-            res += multiply_transposed(deltas[last_layer_idx], network->layers[last_layer_idx - 1]->neurons_act, temp_delta_weights[last_layer_idx]);
-            res += add(delta_weights[network->num_layers - 1], temp_delta_weights[last_layer_idx]);
+            res += multiply_transposed(deltas[L], network->layers[L - 1]->neurons_act, temp_delta_weights[L]);
+            res += add(delta_weights[L], temp_delta_weights[L]);
             if (res < 0)
             {
                 log_exception(__func__, "Exception during output delta weights calculation");
                 return res;
             }
 
+            // printf("Temp delta weights:\n");
+            // print_matrix(deltas[L]);
+            // printf("\n");
+            // print_matrix(network->layers[L - 1]->neurons_act);
+            // printf("\n");
+            // print_matrix(temp_delta_weights[L]);
+
             // Update delta biases
-            res = add(delta_bias[network->num_layers - 1], deltas[last_layer_idx]);
+            res = add(delta_bias[L], deltas[L]);
             if (res < 0)
             {
                 log_exception(__func__, "Exception during output delta bias calculation");
@@ -280,6 +326,7 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
 
             backpropagate(
                 network,
+                input_dataset[i],
                 deltas,
                 temp_deltas,
                 delta_weights,
@@ -290,7 +337,16 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
         }
 
         // TODO: Adjust weights
+        double eta = -1 * (learning_rate/dataset_size);
+        for (int i = 0; i < network->num_layers; i++)
+        {   
+            scalar_multiply(delta_weights[i], eta);
+            add(network->layers[i]->weights, delta_weights[i]);
 
+            scalar_multiply(delta_bias[i], eta);
+            add(network->layers[i]->bias, delta_bias[i]);
+        }
+        
         reset(
             network,
             deltas,
@@ -301,7 +357,7 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
             delta_bias
         );
         
-        break;    
+        epoch++;   
     }
 
     cleanup(
