@@ -262,6 +262,38 @@ int hadamard(Matrix *a, Matrix *b, Matrix *result)
     return 0;    
 }
 
+int argmax(Matrix *a)
+{
+    int max = 0;
+
+    if (a->rows == 1)
+    {
+        for (int i = 0; i < a->cols; i++)
+        {
+            if (a->matrix[0][i] > a->matrix[0][max])
+            {
+                max = i;
+            }
+        }        
+    }
+    else if (a->cols == 1)
+    {
+        for (int i = 0; i < a->rows; i++)
+        {
+            if (a->matrix[i][0] > a->matrix[max][0])
+            {
+                max = i;
+            }
+        }   
+    }
+    else
+    {
+        max = -1;
+    }
+
+    return max;    
+}
+
 int reset_matrix(Matrix *a)
 {
     if (is_null(a))

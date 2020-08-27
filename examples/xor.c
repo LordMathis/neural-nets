@@ -8,7 +8,6 @@ int main() {
 
     Activation *act_sigmoid = create_sigmoid_activation();
     Network *xor_network = create_network(2, 2, layers, act_sigmoid);
-    print_network(xor_network);
 
     Matrix **inputs = (Matrix**) malloc (sizeof (Matrix*) * 4);
     double inputs_mat[4][2][1] = {
@@ -33,16 +32,4 @@ int main() {
     }
 
     train(xor_network, inputs, labels, 4, 100000, 1);
-
-    printf("Trained network:\n");
-    print_network(xor_network);
-    printf("Test\n");
-
-    for (int i = 0; i < 4; i++)
-    {
-        print_matrix(inputs[i]);
-        Matrix *result = predict(xor_network, inputs[i]);
-        print_matrix(result);
-        printf("\n");
-    }    
 }

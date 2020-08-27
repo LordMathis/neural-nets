@@ -53,12 +53,26 @@ Matrix* predict(Network *network, Matrix *input)
         int res = layer_compute(layer, layer_input);
         if (res < 0)
         {
-            log_exception(__func__, "Exception during prediction");
+            logger(EXCEPTION, __func__, "Exception during prediction");
         }
         layer_input = layer->neurons_act;
     }
     
     return layer_input;
+}
+
+Matrix* accuracy(Network *network, Matrix **inputs, Matrix **targets, int input_length)
+{
+    int correct = 0;
+
+    for (int i = 0; i < input_length; i++)
+    {
+        Matrix *prediction = predict(network, inputs[i]);
+        int predicted_class = argmax(prediction);
+        int real_class = argmax(targets[i]);
+        // TODO: 
+    }
+    
 }
 
 static int init_training(
@@ -133,17 +147,9 @@ static int backpropagate(
         res += hadamard(temp_deltas[l], layer->neurons, deltas[l]);
         if (res < 0)
         {
-            log_exception(__func__, "Exception during delta calculation");
+            logger(EXCEPTION, __func__, "Exception during delta calculation");
             return res;
         }
-
-        // printf("Layer %d\n", l);
-        // print_matrix(layer->neurons);
-        // printf("\n");
-        // print_matrix(temp_deltas[l]);
-        // printf("\n");
-        // print_matrix(deltas[l]);
-        // printf("\n");
 
         // Compute delta weights
         res = 0;
@@ -151,7 +157,7 @@ static int backpropagate(
         res += add(delta_weights[l], temp_delta_weights[l]);
         if (res < 0)
         {
-            log_exception(__func__, "Exception during delta weights calculation");
+            logger(EXCEPTION, __func__, "Exception during delta weights calculation");
             return res;
         }
 
@@ -159,16 +165,9 @@ static int backpropagate(
         res = add(delta_bias[l], deltas[l]);
         if (res < 0)
         {
-            log_exception(__func__, "Exception during delta bias calculation");
+            logger(EXCEPTION, __func__, "Exception during delta bias calculation");
             return res;
         }
-
-        // print_matrix(deltas[l]);
-        // printf("\n");
-        // print_matrix(prev_act);
-        // printf("\n");
-        // print_matrix(temp_delta_weights[l]);
-        // printf("\n");
     }      
 }
 
@@ -231,7 +230,7 @@ static int reset(
 
         if (res < 0)
         {
-            log_exception(__func__, "Exception during training temp objects reset");
+            logger(EXCEPTION, __func__, "Exception during training temp objects reset");
             return res;
         }
     }    
@@ -271,20 +270,18 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
 
     while (epoch < epochs) {
 
-        // printf("Epoch: %d/%d\n\n", epoch+1, epochs);
+        char buffer[10 + (epoch%10) + (epochs%10)];
+        sprintf(buffer, "Epoch: %d/%d", epoch+1, epochs);
+        logger(INFO, __func__, buffer);
 
         for (int i = 0; i < dataset_size; i++)
         {
-            // printf("Example:\n");
-            // print_matrix(input_dataset[i]);
-            // printf("\n");
-
             prediction = predict(network, input_dataset[i]);
             target = input_labels[i];
 
             if (predict == NULL)
             {
-                log_exception(__func__, "Exception during prediction");
+                logger(EXCEPTION, __func__, "Exception during prediction");
                 return -1;
             }
 
@@ -295,7 +292,7 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
             res += hadamard(prediction, last_layer->neurons, deltas[L]);
             if (res < 0)
             {
-                log_exception(__func__, "Exception during output delta calculation");
+                logger(EXCEPTION, __func__, "Exception during output delta calculation");
                 return res;
             }
 
@@ -305,22 +302,15 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
             res += add(delta_weights[L], temp_delta_weights[L]);
             if (res < 0)
             {
-                log_exception(__func__, "Exception during output delta weights calculation");
+                logger(EXCEPTION, __func__, "Exception during output delta weights calculation");
                 return res;
             }
-
-            // printf("Temp delta weights:\n");
-            // print_matrix(deltas[L]);
-            // printf("\n");
-            // print_matrix(network->layers[L - 1]->neurons_act);
-            // printf("\n");
-            // print_matrix(temp_delta_weights[L]);
 
             // Update delta biases
             res = add(delta_bias[L], deltas[L]);
             if (res < 0)
             {
-                log_exception(__func__, "Exception during output delta bias calculation");
+                logger(EXCEPTION, __func__, "Exception during output delta bias calculation");
                 return res;
             }
 
@@ -336,7 +326,6 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
             );
         }
 
-        // TODO: Adjust weights
         double eta = -1 * (learning_rate/dataset_size);
         for (int i = 0; i < network->num_layers; i++)
         {   
