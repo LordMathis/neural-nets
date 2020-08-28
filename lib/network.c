@@ -61,18 +61,27 @@ Matrix* predict(Network *network, Matrix *input)
     return layer_input;
 }
 
-Matrix* accuracy(Network *network, Matrix **inputs, Matrix **targets, int input_length)
+double accuracy(Network *network, Matrix **inputs, Matrix **targets, int input_length)
 {
     int correct = 0;
 
     for (int i = 0; i < input_length; i++)
     {
         Matrix *prediction = predict(network, inputs[i]);
-        int predicted_class = argmax(prediction);
-        int real_class = argmax(targets[i]);
-        // TODO: 
+        if (targets[i]->cols == 1 && targets[i]->rows)
+        {
+            double pred_value = prediction->matrix[0][0] < 0.5 ? 0 : 1;
+            if (pred_value == targets[i]->matrix[0][0]) correct++;
+        }
+        else
+        {
+            int predicted_class = argmax(prediction);
+            int real_class = argmax(targets[i]);
+            if (predicted_class == real_class) correct++;
+        } 
     }
-    
+
+    return (double) correct/input_length;    
 }
 
 static int init_training(
@@ -268,6 +277,8 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
     int res = 0;
     int epoch = 0;
 
+    double epoch_accuracy;
+
     while (epoch < epochs) {
 
         char buffer[10 + (epoch%10) + (epochs%10)];
@@ -335,6 +346,11 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
             scalar_multiply(delta_bias[i], eta);
             add(network->layers[i]->bias, delta_bias[i]);
         }
+
+        epoch_accuracy = accuracy(network, input_dataset, input_labels, dataset_size);
+        char acc_buffer[16];
+        sprintf(acc_buffer, "Accuracy: %.3f", epoch_accuracy);
+        logger(INFO, __func__, acc_buffer);
         
         reset(
             network,
