@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include "functions.h"
+#include "matrix.h"
 
 // Activations and derivatives
 
@@ -44,4 +45,22 @@ int delete_activation(Activation *activation)
     activation = NULL;
 
     return 0;
+}
+
+// Cost and derivatives
+
+double mean_squared_error(Matrix *prediction, Matrix *target)
+{
+    if (prediction->cols != 1 || target->cols != 1 || prediction->rows != target->rows)
+    {
+        return -1;
+    }
+
+    double loss = 0;
+    for (int i = 0; i < prediction->rows; i++)
+    {
+        loss += pow(prediction->matrix[i][0] - target->matrix[i][0], 2);
+    }
+
+    return loss / (2*prediction->rows);    
 }

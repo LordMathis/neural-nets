@@ -31,5 +31,5 @@ int main() {
         labels[i] = create_matrix(1, 1, labels_mat[i]);
     }
 
-    train(xor_network, inputs, labels, 4, 100000, 1);
+    train(xor_network, inputs, labels, 4, 0, 10000, 1);
 }

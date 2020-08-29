@@ -1,3 +1,5 @@
+#include "matrix.h"
+
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
@@ -16,5 +18,7 @@ Activation* create_sigmoid_activation();
 Activation* create_relu_activation();
 
 int delete_activation(Activation *activation);
+
+double mean_squared_error(Matrix *prediction, Matrix *target);
 
 #endif /* FUNCTIONS_H */

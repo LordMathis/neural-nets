@@ -4,6 +4,7 @@
 #include "utils.h"
 #include <stdlib.h>
 #include <stdio.h>
+#include <limits.h>
 
 Network* create_network(int input_size, int num_layers, int layers[], Activation *activation)
 {
@@ -245,7 +246,7 @@ static int reset(
     }    
 }
 
-int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int dataset_size, int epochs, double learning_rate)
+int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int dataset_size, int batch_size, int epochs, double learning_rate)
 {
     // Allocate all the memory
     Matrix **delta_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
@@ -278,6 +279,15 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
     int epoch = 0;
 
     double epoch_accuracy;
+    double prev_epoch_loss = (double) INT_MAX;
+    double epoch_loss;
+
+    int grace = 10;
+
+    if (batch_size == 0)
+    {
+        batch_size = dataset_size;
+    }
 
     while (epoch < epochs) {
 
@@ -285,49 +295,82 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
         sprintf(buffer, "Epoch: %d/%d", epoch+1, epochs);
         logger(INFO, __func__, buffer);
 
-        for (int i = 0; i < dataset_size; i++)
+        epoch_loss = 0;
+
+        int i = 0;
+
+        while (i<dataset_size)
         {
-            prediction = predict(network, input_dataset[i]);
-            target = input_labels[i];
+            int batch_start = i;
+            int batch_end = batch_start + batch_size;
 
-            if (predict == NULL)
+
+            for (int j = batch_start; j < batch_end; j++)
             {
-                logger(EXCEPTION, __func__, "Exception during prediction");
-                return -1;
-            }
+                prediction = predict(network, input_dataset[j]);
+                target = input_labels[j];
 
-            // Calculate initial delta
-            res = 0;
-            res += subtract(prediction, target);
-            res += apply(last_layer->neurons, NULL, last_layer->activation->fn_der);
-            res += hadamard(prediction, last_layer->neurons, deltas[L]);
-            if (res < 0)
-            {
-                logger(EXCEPTION, __func__, "Exception during output delta calculation");
-                return res;
-            }
+                if (predict == NULL)
+                {
+                    logger(EXCEPTION, __func__, "Exception during prediction");
+                    return -1;
+                }
 
-            // Update delta weights
-            res = 0;
-            res += multiply_transposed(deltas[L], network->layers[L - 1]->neurons_act, temp_delta_weights[L]);
-            res += add(delta_weights[L], temp_delta_weights[L]);
-            if (res < 0)
-            {
-                logger(EXCEPTION, __func__, "Exception during output delta weights calculation");
-                return res;
-            }
+                epoch_loss += mean_squared_error(prediction, target);
 
-            // Update delta biases
-            res = add(delta_bias[L], deltas[L]);
-            if (res < 0)
-            {
-                logger(EXCEPTION, __func__, "Exception during output delta bias calculation");
-                return res;
-            }
+                // Calculate initial delta
+                res = 0;
+                res += subtract(prediction, target);
+                res += apply(last_layer->neurons, NULL, last_layer->activation->fn_der);
+                res += hadamard(prediction, last_layer->neurons, deltas[L]);
+                if (res < 0)
+                {
+                    logger(EXCEPTION, __func__, "Exception during output delta calculation");
+                    return res;
+                }
 
-            backpropagate(
+                // Update delta weights
+                res = 0;
+                res += multiply_transposed(deltas[L], network->layers[L - 1]->neurons_act, temp_delta_weights[L]);
+                res += add(delta_weights[L], temp_delta_weights[L]);
+                if (res < 0)
+                {
+                    logger(EXCEPTION, __func__, "Exception during output delta weights calculation");
+                    return res;
+                }
+
+                // Update delta biases
+                res = add(delta_bias[L], deltas[L]);
+                if (res < 0)
+                {
+                    logger(EXCEPTION, __func__, "Exception during output delta bias calculation");
+                    return res;
+                }
+
+                backpropagate(
+                    network,
+                    input_dataset[j],
+                    deltas,
+                    temp_deltas,
+                    delta_weights,
+                    temp_delta_weights,
+                    transposed_weights,
+                    delta_bias
+                );
+            }        
+
+            double eta = -1 * (learning_rate/dataset_size);
+            for (int j = 0; j < network->num_layers; j++)
+            {   
+                scalar_multiply(delta_weights[j], eta);
+                add(network->layers[j]->weights, delta_weights[j]);
+
+                scalar_multiply(delta_bias[j], eta);
+                add(network->layers[j]->bias, delta_bias[j]);
+            }
+            
+            reset(
                 network,
-                input_dataset[i],
                 deltas,
                 temp_deltas,
                 delta_weights,
@@ -335,32 +378,19 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
                 transposed_weights,
                 delta_bias
             );
-        }
 
-        double eta = -1 * (learning_rate/dataset_size);
-        for (int i = 0; i < network->num_layers; i++)
-        {   
-            scalar_multiply(delta_weights[i], eta);
-            add(network->layers[i]->weights, delta_weights[i]);
-
-            scalar_multiply(delta_bias[i], eta);
-            add(network->layers[i]->bias, delta_bias[i]);
+            i+=batch_size;
         }
 
         epoch_accuracy = accuracy(network, input_dataset, input_labels, dataset_size);
         char acc_buffer[16];
         sprintf(acc_buffer, "Accuracy: %.3f", epoch_accuracy);
         logger(INFO, __func__, acc_buffer);
-        
-        reset(
-            network,
-            deltas,
-            temp_deltas,
-            delta_weights,
-            temp_delta_weights,
-            transposed_weights,
-            delta_bias
-        );
+
+        epoch_loss = (double) epoch_loss / dataset_size;
+        char loss_buffer[23];
+        sprintf(loss_buffer, "Training loss: %.5f", epoch_loss);
+        logger(INFO, __func__, loss_buffer);
         
         epoch++;   
     }
