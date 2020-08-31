@@ -2,6 +2,8 @@
 
 #define UTILS_H
 
+#include "matrix.h"
+
 #define RED_COLOR printf("\033[0;31m")
 #define GREEN_COLOR printf("\033[0;32m")
 #define RESET_COLOR printf("\033[0m" )
@@ -13,6 +15,28 @@
 #ifndef LOG_LEVEL
 #define LOG_LEVEL 1
 #endif
+
+typedef struct
+{
+    int train_size;
+    Matrix **train_inputs;
+    Matrix **train_labels;
+    int val_size;
+    Matrix **val_inputs;
+    Matrix **val_labels;
+} Dataset;
+
+Dataset* create_dataset(
+    int train_size,
+    int input_size,
+    int output_size,
+    int val_size,
+    double *train_input_mat[train_size][input_size][1],
+    double *train_label_mat[train_size][output_size][1],
+    double *val_input_mat[val_size][input_size][1],
+    double *val_label_mat[val_size][output_size][1]
+);
+int delete_dataset(Dataset *dataset);
 
 void logger(int log_level, const char *function_name, const char *message);
 

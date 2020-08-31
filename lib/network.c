@@ -246,7 +246,7 @@ static int reset(
     }    
 }
 
-int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int dataset_size, int batch_size, int epochs, double learning_rate)
+int train(Network *network, Dataset *dataset, int batch_size, int epochs, double learning_rate)
 {
     // Allocate all the memory
     Matrix **delta_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
@@ -286,7 +286,7 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
 
     if (batch_size == 0)
     {
-        batch_size = dataset_size;
+        batch_size = dataset->train_size;
     }
 
     while (epoch < epochs) {
@@ -299,7 +299,7 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
 
         int i = 0;
 
-        while (i<dataset_size)
+        while (i < dataset->train_size)
         {
             int batch_start = i;
             int batch_end = batch_start + batch_size;
@@ -307,8 +307,8 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
 
             for (int j = batch_start; j < batch_end; j++)
             {
-                prediction = predict(network, input_dataset[j]);
-                target = input_labels[j];
+                prediction = predict(network, dataset->train_inputs[j]);
+                target = dataset->train_labels[j];
 
                 if (predict == NULL)
                 {
@@ -349,7 +349,7 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
 
                 backpropagate(
                     network,
-                    input_dataset[j],
+                    dataset->train_inputs[j],
                     deltas,
                     temp_deltas,
                     delta_weights,
@@ -359,7 +359,7 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
                 );
             }        
 
-            double eta = -1 * (learning_rate/dataset_size);
+            double eta = -1 * (learning_rate/dataset->train_size);
             for (int j = 0; j < network->num_layers; j++)
             {   
                 scalar_multiply(delta_weights[j], eta);
@@ -382,12 +382,12 @@ int train(Network *network, Matrix **input_dataset, Matrix** input_labels, int d
             i+=batch_size;
         }
 
-        epoch_accuracy = accuracy(network, input_dataset, input_labels, dataset_size);
-        char acc_buffer[16];
-        sprintf(acc_buffer, "Accuracy: %.3f", epoch_accuracy);
+        epoch_accuracy = accuracy(network, dataset->val_inputs, dataset->val_labels, dataset->val_size);
+        char acc_buffer[27];
+        sprintf(acc_buffer, "Validation accuracy: %.3f", epoch_accuracy);
         logger(INFO, __func__, acc_buffer);
 
-        epoch_loss = (double) epoch_loss / dataset_size;
+        epoch_loss = (double) epoch_loss / dataset->train_size;
         char loss_buffer[23];
         sprintf(loss_buffer, "Training loss: %.5f", epoch_loss);
         logger(INFO, __func__, loss_buffer);
