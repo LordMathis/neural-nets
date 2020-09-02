@@ -31,12 +31,17 @@ Dataset* create_dataset(
     int input_size,
     int output_size,
     int val_size,
-    double *train_input_mat[train_size][input_size][1],
-    double *train_label_mat[train_size][output_size][1],
-    double *val_input_mat[val_size][input_size][1],
-    double *val_label_mat[val_size][output_size][1]
+    Matrix **train_inputs,
+    Matrix **train_labels,
+    Matrix **val_inputs,
+    Matrix **val_labels
 );
 int delete_dataset(Dataset *dataset);
+
+typedef enum {
+    loss,
+    acc
+} Monitor;
 
 void logger(int log_level, const char *function_name, const char *message);
 

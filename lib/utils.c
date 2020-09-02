@@ -21,56 +21,36 @@ Dataset* create_dataset(
     int input_size,
     int output_size,
     int val_size,
-    double *train_input_mat[train_size][input_size][1],
-    double *train_label_mat[train_size][output_size][1],
-    double *val_input_mat[val_size][input_size][1],
-    double *val_label_mat[val_size][output_size][1])
+    Matrix **train_inputs,
+    Matrix **train_labels,
+    Matrix **val_inputs,
+    Matrix **val_labels)
 {
     Dataset *dataset = (Dataset *) malloc (sizeof (Dataset));
     dataset->train_size = train_size;
-    dataset->train_inputs = (Matrix **) malloc (sizeof (Matrix*) *train_size);
-    dataset->train_labels = (Matrix **) malloc (sizeof (Matrix*) *train_size);
-
     dataset->val_size = val_size;
-    dataset->val_inputs = (Matrix **) malloc (sizeof (Matrix*) *val_size);
-    dataset->val_labels = (Matrix **) malloc (sizeof (Matrix*) *val_size);
 
-    for (int i = 0; i < train_size; i++)
+    if (train_inputs == NULL || train_labels == NULL)
     {
-        dataset->train_inputs[i] = create_matrix(input_size, 1, train_input_mat[i]);
-        dataset->train_labels[i] = create_matrix(output_size, 1, train_label_mat[i]);
+        return NULL;
     }
 
-    for (int i = 0; i < val_size; i++)
+    dataset->train_inputs = train_inputs;
+    dataset->train_labels = train_labels;
+    dataset->val_inputs = val_inputs;
+    dataset->val_labels = val_labels;
+
+    if (val_inputs == NULL)
     {
-        dataset->val_inputs[i] = create_matrix(input_size, 1, val_input_mat[i]);
-        dataset->val_labels[i] = create_matrix(output_size, 1, val_label_mat[i]);
+        dataset->val_inputs = train_inputs;
+        dataset->val_labels = train_labels;
     }
-    
+
     return dataset;
 }
 
 int delete_dataset(Dataset *dataset)
 {
-    for (int i = 0; i < dataset->train_size; i++)
-    {
-        delete(dataset->train_inputs[i]);
-        delete(dataset->train_labels[i]);
-    }
-
-    for (int i = 0; i < dataset->val_size; i++)
-    {
-        delete(dataset->val_inputs[i]);
-        delete(dataset->val_labels[i]);
-    }
-
-    free(dataset->train_inputs);
-    free(dataset->train_labels);
-    free(dataset->val_inputs);
-    free(dataset->val_labels);
-
     free(dataset);
-    return 0;
-    
-    
+    return 0;    
 }

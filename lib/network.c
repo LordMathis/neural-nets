@@ -246,7 +246,7 @@ static int reset(
     }    
 }
 
-int train(Network *network, Dataset *dataset, int batch_size, int epochs, double learning_rate)
+int train(Network *network, Dataset *dataset, Monitor *monitor, int batch_size, int epochs, double learning_rate)
 {
     // Allocate all the memory
     Matrix **delta_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);

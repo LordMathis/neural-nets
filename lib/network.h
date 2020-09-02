@@ -14,5 +14,5 @@ void print_network(Network *network);
 int delete_network(Network *network);
 Matrix* predict(Network *network, Matrix *input);
 double accuracy(Network *network, Matrix **inputs, Matrix **targets, int input_length);
-int train(Network *network, Dataset *dataset, int batch_size, int epochs, double learning_rate);
+int train(Network *network, Dataset *dataset, Monitor *monitor, int batch_size, int epochs, double learning_rate);
 
