@@ -54,3 +54,29 @@ int delete_dataset(Dataset *dataset)
     free(dataset);
     return 0;    
 }
+
+Matrix** load_csv(char *filename, int lines, int line_length)
+{
+    FILE* fp = fopen(filename, "r");
+
+    if (!fp) 
+    {
+        logger(EXCEPTION, __func__, "Failed to open csv file");
+        return NULL;
+    }
+
+    Matrix **result = (Matrix**) malloc (sizeof (Matrix*) * lines);
+
+    int buffer_length = line_length*4;
+    char buffer[buffer_length];
+
+    int line_idx = 0;
+    while(fgets(buffer, buffer_length, fp)) {
+        printf("%s\n", buffer);
+        // TODO: Process line into array
+        line_idx++;
+    }
+
+    fclose(fp);
+    
+}

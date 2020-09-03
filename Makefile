@@ -8,5 +8,9 @@ test: build_dir
 xor: build_dir
 	gcc -g ./examples/xor.c ./lib/*.c -o ./build/xor -lm
 
+mnist: build_dir
+	gcc -g ./examples/mnist.c ./lib/*.c -o ./build/mnist -lm
+
+
 clean:
 	rm -r ./build

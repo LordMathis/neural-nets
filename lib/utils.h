@@ -45,4 +45,6 @@ typedef enum {
 
 void logger(int log_level, const char *function_name, const char *message);
 
+Matrix** load_csv(char *filename, int lines, int line_length);
+
 #endif

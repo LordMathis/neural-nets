@@ -13,7 +13,7 @@
                 "$gcc"
             ],
             "group": {
-                "kind": "build",
+                "kind": "test",
                 "isDefault": true
             }
         },
@@ -22,6 +22,22 @@
             "label": "Make xor example",
             "command": "/bin/make",
             "args": [ "xor" ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "type": "shell",
+            "label": "Make mnist example",
+            "command": "/bin/make",
+            "args": [ "mnist" ],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
