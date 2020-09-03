@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "utils.h"
 #include "matrix.h"
 
@@ -71,12 +72,20 @@ Matrix** load_csv(char *filename, int lines, int line_length)
     char buffer[buffer_length];
 
     int line_idx = 0;
-    while(fgets(buffer, buffer_length, fp)) {
-        printf("%s\n", buffer);
-        // TODO: Process line into array
-        line_idx++;
+    while(fgets(buffer, buffer_length, fp)) {        
+        char *token = strtok(buffer, ",");
+        double mat[line_length][1];
+
+        int i = 0;
+        while( token != NULL ) {
+            mat[++i][0] = strtod(token, NULL);
+            token = strtok(NULL, ",");
+        }
+
+        result[++line_idx] = create_matrix(line_length, 1, mat);
+
     }
 
     fclose(fp);
-    
+    return result;
 }

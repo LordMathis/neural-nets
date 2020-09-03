@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-Matrix* create_matrix(int rows, int cols, const double mat[rows][cols])
+Matrix* create_matrix(int rows, int cols, const double mat[][cols])
 {
     Matrix *matrix = (Matrix *) malloc (sizeof (Matrix));
 

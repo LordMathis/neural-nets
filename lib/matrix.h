@@ -10,7 +10,7 @@ typedef struct
     double **matrix;
 } Matrix;
 
-Matrix *create_matrix(int rows, int cols, const double mat[rows][cols]);
+Matrix *create_matrix(int rows, int cols, const double mat[][cols]);
 void print_matrix(Matrix *matrix);
 bool is_null(Matrix *matrix);
 int transpose(Matrix *a, Matrix *result);
