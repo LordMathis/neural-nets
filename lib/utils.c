@@ -78,14 +78,33 @@ Matrix** load_csv(char *filename, int lines, int line_length)
 
         int i = 0;
         while( token != NULL ) {
-            mat[++i][0] = strtod(token, NULL);
+            mat[i++][0] = strtod(token, NULL);
             token = strtok(NULL, ",");
         }
 
-        result[++line_idx] = create_matrix(line_length, 1, mat);
-
+        result[line_idx++] = create_matrix(line_length, 1, mat);
     }
 
     fclose(fp);
     return result;
+}
+
+int vectorize(Matrix **a, int length, int num_classes)
+{
+    for (int i = 0; i < length; i++)
+    {
+        int index = (int) a[i]->matrix[0][0];
+        if (index >= num_classes)
+        {
+            return -1;
+        }
+
+        double mat[num_classes][1];
+        mat[index][0] = 1;
+
+        delete(a[i]);
+        a[i] = create_matrix(num_classes, 1, mat);
+    }
+
+    return 0;    
 }
