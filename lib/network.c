@@ -69,7 +69,7 @@ double accuracy(Network *network, Matrix **inputs, Matrix **targets, int input_l
     for (int i = 0; i < input_length; i++)
     {
         Matrix *prediction = predict(network, inputs[i]);
-        if (targets[i]->cols == 1 && targets[i]->rows)
+        if (targets[i]->cols == 1 && targets[i]->rows == 1)
         {
             double pred_value = prediction->matrix[0][0] < 0.5 ? 0 : 1;
             if (pred_value == targets[i]->matrix[0][0]) correct++;
