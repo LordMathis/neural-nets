@@ -387,12 +387,17 @@ int train(Network *network, Dataset *dataset, Monitor *monitor, int batch_size, 
         sprintf(acc_buffer, "Validation accuracy: %.3f", epoch_accuracy);
         logger(INFO, __func__, acc_buffer);
 
+        epoch_accuracy = accuracy(network, dataset->train_inputs, dataset->train_labels, dataset->train_size);
+        char acc_train_buffer[27];
+        sprintf(acc_train_buffer, "Training accuracy: %.3f", epoch_accuracy);
+        logger(INFO, __func__, acc_train_buffer);
+
         epoch_loss = (double) epoch_loss / dataset->train_size;
         char loss_buffer[23];
         sprintf(loss_buffer, "Training loss: %.5f", epoch_loss);
         logger(INFO, __func__, loss_buffer);
         
-        epoch++;   
+        epoch++;
     }
 
     cleanup(

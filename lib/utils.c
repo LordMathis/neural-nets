@@ -100,6 +100,11 @@ int vectorize(Matrix **a, int length, int num_classes)
         }
 
         double mat[num_classes][1];
+        for (int j = 0; j < num_classes; j++)
+        {
+            mat[j][0] = 0;
+        }
+        
         mat[index][0] = 1;
 
         delete(a[i]);
@@ -107,4 +112,26 @@ int vectorize(Matrix **a, int length, int num_classes)
     }
 
     return 0;    
+}
+
+int normalize(Matrix **a, int length, int max_num)
+{
+    for (int i = 0; i < length; i++)
+    {
+        Matrix *matrix = a[i];
+        if (is_null(matrix))
+        {
+            return -1;
+        }
+
+        for (int j = 0; j < matrix->rows; j++)
+        {
+            for (int k = 0; k < matrix->cols; k++)
+            {
+                matrix->matrix[j][k] = matrix->matrix[j][k] / max_num;
+            }            
+        }        
+    }
+    
+    return 0;
 }
