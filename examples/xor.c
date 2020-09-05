@@ -35,5 +35,5 @@ int main() {
     Monitor monitor[] = {acc, loss};
     Dataset *dataset = create_dataset(4,2,1,4, inputs, labels, NULL, NULL);
 
-    train(xor_network, dataset, monitor, 0, 5000, 1);
+    train(xor_network, dataset, monitor, 0, 20, 1);
 }

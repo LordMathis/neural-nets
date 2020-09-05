@@ -312,7 +312,7 @@ int reset_matrix(Matrix *a)
     return 0;    
 }
 
-int delete(Matrix *a)
+int delete_matrix(Matrix *a)
 {
     if (is_null(a))
     {

@@ -90,7 +90,7 @@ int test_layer_compute()
 
         // Cleanup
     delete_layer(layer);
-    delete(input);
+    delete_matrix(input);
     delete_activation(sigmoid);
     return eval_test_result(__func__, res);
 }

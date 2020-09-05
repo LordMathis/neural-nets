@@ -107,7 +107,7 @@ int vectorize(Matrix **a, int length, int num_classes)
         
         mat[index][0] = 1;
 
-        delete(a[i]);
+        delete_matrix(a[i]);
         a[i] = create_matrix(num_classes, 1, mat);
     }
 

@@ -50,7 +50,7 @@ static int test_create_matrix()
     }
 
     // Cleanup
-    delete(matrix);
+    delete_matrix(matrix);
    
     return eval_test_result(__func__, res);
 }
@@ -88,7 +88,7 @@ static int test_is_null()
 
     // Cleanup
     matrix->matrix = temp;
-    delete(matrix);
+    delete_matrix(matrix);
    
     return eval_test_result(__func__, res);
 }
@@ -128,8 +128,8 @@ static int test_transpose()
 
     // Cleanup
 
-    delete(matrix);
-    delete(transposed);
+    delete_matrix(matrix);
+    delete_matrix(transposed);
    
     return eval_test_result(__func__, res);
 }
@@ -184,11 +184,11 @@ static int test_multiply()
     }
 
     // Cleanup
-    delete(a_matrix);
-    delete(b_matrix);
-    delete(c_matrix);
-    delete(res_wrong_dims_mat);
-    delete(res_matrix);
+    delete_matrix(a_matrix);
+    delete_matrix(b_matrix);
+    delete_matrix(c_matrix);
+    delete_matrix(res_wrong_dims_mat);
+    delete_matrix(res_matrix);
    
     return eval_test_result(__func__, res);
 }
@@ -243,11 +243,11 @@ static int test_multiply_transposed()
     }
 
     // Cleanup
-    delete(a_matrix);
-    delete(b_matrix);
-    delete(c_matrix);
-    delete(res_wrong_dims_mat);
-    delete(res_matrix);
+    delete_matrix(a_matrix);
+    delete_matrix(b_matrix);
+    delete_matrix(c_matrix);
+    delete_matrix(res_wrong_dims_mat);
+    delete_matrix(res_matrix);
    
     return eval_test_result(__func__, res);
 }
@@ -296,9 +296,9 @@ static int test_add()
     }
 
     // Cleanup
-    delete(a_matrix);
-    delete(b_matrix);
-    delete(c_matrix);
+    delete_matrix(a_matrix);
+    delete_matrix(b_matrix);
+    delete_matrix(c_matrix);
    
     return eval_test_result(__func__, res);
 }
@@ -347,9 +347,9 @@ static int test_subtract()
     }
 
     // Cleanup
-    delete(a_matrix);
-    delete(b_matrix);
-    delete(c_matrix);
+    delete_matrix(a_matrix);
+    delete_matrix(b_matrix);
+    delete_matrix(c_matrix);
    
     return eval_test_result(__func__, res);
 }
@@ -380,7 +380,7 @@ static int test_scalar_multiply()
     }
 
     // Cleanup
-    delete(a); 
+    delete_matrix(a); 
    
     return eval_test_result(__func__, res);
 }
@@ -412,7 +412,7 @@ static int test_scalar_add()
     }
 
     // Cleanup
-    delete(a);   
+    delete_matrix(a);   
    
     return eval_test_result(__func__, res);
 }
@@ -448,7 +448,7 @@ static int test_apply()
         res+=fail(__func__, "Wrong matrix dimensions or values");
     }
 
-    delete(a_matrix);
+    delete_matrix(a_matrix);
     square_ptr = NULL;
    
     return eval_test_result(__func__, res);
@@ -504,11 +504,11 @@ static int test_hadamard()
     }
 
     // Cleanup
-    delete(a_matrix);
-    delete(b_matrix);
-    delete(c_matrix);
-    delete(res_wrong_dims_mat);
-    delete(res_matrix);
+    delete_matrix(a_matrix);
+    delete_matrix(b_matrix);
+    delete_matrix(c_matrix);
+    delete_matrix(res_wrong_dims_mat);
+    delete_matrix(res_matrix);
    
     return eval_test_result(__func__, res);
 }

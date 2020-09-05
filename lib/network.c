@@ -193,14 +193,14 @@ static void cleanup(
         // Cleanup
     for (int i = 0; i < network_length; i++)
     {
-        delete(deltas[i]);
-        delete(delta_weights[i]);
-        delete(temp_delta_weights[i]);
-        delete(delta_bias[i]);
+        delete_matrix(deltas[i]);
+        delete_matrix(delta_weights[i]);
+        delete_matrix(temp_delta_weights[i]);
+        delete_matrix(delta_bias[i]);
 
         if (i != network_length - 1) {
-            delete(transposed_weights[i]);
-            delete(temp_deltas[i]);
+            delete_matrix(transposed_weights[i]);
+            delete_matrix(temp_deltas[i]);
         }
     }
     free(deltas);

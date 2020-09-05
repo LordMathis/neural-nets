@@ -64,10 +64,10 @@ int delete_layer(Layer *layer)
         return -1;
     }
     
-    delete(layer->weights);
-    delete(layer->bias);
-    delete(layer->neurons);
-    delete(layer->neurons_act);
+    delete_matrix(layer->weights);
+    delete_matrix(layer->bias);
+    delete_matrix(layer->neurons);
+    delete_matrix(layer->neurons_act);
 
     free(layer);
     layer = NULL;

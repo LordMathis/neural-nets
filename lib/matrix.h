@@ -24,6 +24,6 @@ int apply(Matrix *a, Matrix *result, double (*fn)(double));
 int hadamard(Matrix *a, Matrix *b, Matrix *result);
 int argmax(Matrix *a);
 int reset_matrix(Matrix *a);
-int delete(Matrix *a);
+int delete_matrix(Matrix *a);
 
 #endif /* MATRIX_H */
