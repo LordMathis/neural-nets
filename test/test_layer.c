@@ -1,5 +1,4 @@
 #include "test.h"
-#include "test_utils.h"
 #include "../lib/layer.h"
 #include "../lib/matrix.h"
 #include "../lib/functions.h"
