@@ -49,6 +49,7 @@ int main()
     res += test_layer();
     res += test_network();
     res += test_functions();
+    res += test_utils();
 
     eval_test_result("All tests finished!", res);
 

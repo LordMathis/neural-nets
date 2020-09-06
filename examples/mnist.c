@@ -25,10 +25,10 @@ int main()
     Dataset *dataset = create_dataset(60000, 28*28, 10, 10000, train_inputs, train_labels, test_inputs, test_labels);
     Monitor monitor[] = {acc, loss};
 
-    int layers[] = {50,10};
+    int layers[] = {100,10};
 
     Activation *act_sigmoid = create_sigmoid_activation();
     Network *mnist_network = create_network(28*28, 2, layers, act_sigmoid);
 
-    train(mnist_network, dataset, monitor, 100, 10, 2);
+    train(mnist_network, dataset, monitor, 100, 100, 1);
 }
