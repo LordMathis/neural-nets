@@ -1,6 +1,7 @@
 #include "../lib/network.h"
 #include "../lib/functions.h"
 #include "../lib/utils.h"
+#include "../lib/matrix.h"
 #include <stdlib.h>
 #include <stdio.h>
 

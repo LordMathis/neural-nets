@@ -513,6 +513,41 @@ static int test_hadamard()
     return eval_test_result(__func__, res);
 }
 
+static int test_argmax()
+{
+    // Setup
+    int res = 0;
+    double mat[10][1];
+    for (int i = 0; i < 10; i++)
+    {
+        mat[i][0] = (double) i / 10;
+    }
+
+    Matrix *a = create_matrix(10, 1, mat);
+
+    // Tests
+    int arg = argmax(a);
+
+    if (arg != 9)
+    {
+        res+=fail(__func__, "Wrong argmax result");
+    }
+
+    int index = 4;
+    a->matrix[index][0] += 10;
+
+    arg = argmax(a);
+
+    if (arg != index)
+    {
+        res+=fail(__func__, "Wrong argmax result");
+    }
+
+    // Cleanup
+    delete_matrix(a);
+    return eval_test_result(__func__, res);
+}
+
 int test_matrix()
 {
     int res = 0;
@@ -527,6 +562,7 @@ int test_matrix()
     res += test_scalar_add();
     res += test_apply();
     res += test_hadamard();
+    res += test_argmax();
 
     return res;
 }
