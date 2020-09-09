@@ -76,7 +76,37 @@ static int test_predict()
 
 static int test_init_training()
 {
-    return 0;
+    // Setup
+    int res = 0;
+
+    int input_size = 10;
+    int num_layers = 3;
+    int layers[] = {30,20,10};
+
+    Activation *sigmoid = create_sigmoid_activation();
+    Network *network = create_network(input_size, num_layers, layers, sigmoid);
+
+    Matrix **delta_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
+    Matrix **temp_delta_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
+
+    Matrix **delta_bias = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
+
+    Matrix **deltas = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
+
+    Matrix **temp_deltas = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers -1);
+    Matrix **transposed_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers - 1);
+
+    init_training(
+        network,
+        deltas,
+        temp_deltas,
+        delta_weights,
+        temp_delta_weights,
+        transposed_weights,
+        delta_bias
+    );
+
+    // Test
 }
 
 int test_network()
