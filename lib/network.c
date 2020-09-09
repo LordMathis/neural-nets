@@ -85,7 +85,7 @@ double accuracy(Network *network, Matrix **inputs, Matrix **targets, int input_l
     return (double) correct/input_length;    
 }
 
-static int init_training(
+unit_static int init_training(
     Network *network,
     Matrix **deltas,
     Matrix **temp_deltas,
@@ -123,7 +123,7 @@ static int init_training(
     return 0;
 }
 
-static int backpropagate(
+unit_static int backpropagate(
     Network *network,
     Matrix *input,
     Matrix **deltas,
@@ -181,7 +181,7 @@ static int backpropagate(
     }      
 }
 
-static void cleanup(
+unit_static void cleanup(
     int network_length,
     Matrix **deltas,
     Matrix **temp_deltas,
@@ -211,7 +211,7 @@ static void cleanup(
     free(delta_bias);
 }
 
-static int reset(
+unit_static int reset(
     Network *network,
     Matrix **deltas,
     Matrix **temp_deltas,

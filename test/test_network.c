@@ -42,7 +42,7 @@ static int test_create_network()
     return eval_test_result(__func__, res);
 }
 
-int test_predict()
+static int test_predict()
 {
     int res = 0;
 
@@ -72,6 +72,11 @@ int test_predict()
     delete_network(network);
     delete_activation(sigmoid);
     return eval_test_result(__func__, res);
+}
+
+static int test_init_training()
+{
+    return 0;
 }
 
 int test_network()

@@ -5,7 +5,9 @@
             "type": "shell",
             "label": "Make test",
             "command": "/bin/make",
-            "args": [ "test" ],
+            "args": [
+                "test"
+            ],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -21,7 +23,9 @@
             "type": "shell",
             "label": "Make xor example",
             "command": "/bin/make",
-            "args": [ "xor" ],
+            "args": [
+                "xor"
+            ],
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -37,7 +41,9 @@
             "type": "shell",
             "label": "Make mnist example",
             "command": "/bin/make",
-            "args": [ "mnist" ],
+            "args": [
+                "mnist"
+            ],
             "options": {
                 "cwd": "${workspaceFolder}"
             },

@@ -11,6 +11,5 @@ xor: build_dir
 mnist: build_dir
 	gcc -g ./examples/mnist.c ./lib/*.c -o ./build/mnist -lm
 
-
 clean:
 	rm -r ./build
