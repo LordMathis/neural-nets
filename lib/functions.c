@@ -49,7 +49,7 @@ int delete_activation(Activation *activation)
 
 // Cost and derivatives
 
-double mean_squared_error(Matrix *prediction, Matrix *target)
+double cost_mse(Matrix *prediction, Matrix *target)
 {
     if (prediction->cols != 1 || target->cols != 1 || prediction->rows != target->rows)
     {
@@ -63,4 +63,16 @@ double mean_squared_error(Matrix *prediction, Matrix *target)
     }
 
     return loss / (2*prediction->rows);    
+}
+
+int cost_mse_der(Matrix *prediction, Matrix *target)
+{
+    return subtract(prediction, target);
+}
+
+Cost* create_mse_cost()
+{
+    Cost *cost = (Cost*) malloc ( sizeof (Cost));
+    cost->cost = &cost_mse;
+    cost->cost_der = &cost_mse_der;
 }

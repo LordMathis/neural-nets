@@ -9,21 +9,23 @@ Matrix* create_matrix(int rows, int cols, const double mat[][cols])
 
     matrix->rows = rows;
     matrix->cols = cols;
+    matrix->matrix = NULL;
 
-
-    matrix->matrix = (double**) malloc (sizeof (double*) *rows);
-    for (int i = 0; i < rows; i++)
-    {
-        matrix->matrix[i] = (double*) malloc (sizeof (double) *cols);
-        for (int j = 0; j < cols; j++)
+    if (rows > 0 && cols > 0) {
+        matrix->matrix = (double**) malloc (sizeof (double*) *rows);
+        for (int i = 0; i < rows; i++)
         {
-            if (mat != NULL)
+            matrix->matrix[i] = (double*) malloc (sizeof (double) *cols);
+            for (int j = 0; j < cols; j++)
             {
-                matrix->matrix[i][j] = mat[i][j];
-            }
-            else
-            {
-                matrix->matrix[i][j] = 0;
+                if (mat != NULL)
+                {
+                    matrix->matrix[i][j] = mat[i][j];
+                }
+                else
+                {
+                    matrix->matrix[i][j] = 0;
+                }
             }
         }
     }

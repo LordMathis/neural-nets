@@ -19,6 +19,16 @@ Activation* create_relu_activation();
 
 int delete_activation(Activation *activation);
 
-double mean_squared_error(Matrix *prediction, Matrix *target);
+typedef struct
+{
+    double (*cost)(Matrix *prediction, Matrix *target);
+    int (*cost_der)(Matrix *prediction, Matrix *target);
+} Cost;
+
+Cost* create_mse_cost();
+
+
+double cost_mse(Matrix *prediction, Matrix *target);
+int cost_mse_der(Matrix *prediction, Matrix *target);
 
 #endif /* FUNCTIONS_H */

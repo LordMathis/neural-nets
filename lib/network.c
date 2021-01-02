@@ -246,7 +246,14 @@ unit_static int reset(
     }    
 }
 
-int train(Network *network, Dataset *dataset, Monitor *monitor, int batch_size, int epochs, double learning_rate)
+int train(
+    Network *network,
+    Dataset *dataset,
+    Monitor *monitor,
+    Cost *cost,
+    int batch_size,
+    int epochs,
+    double learning_rate)
 {
     // Allocate all the memory
     Matrix **delta_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
@@ -304,6 +311,10 @@ int train(Network *network, Dataset *dataset, Monitor *monitor, int batch_size, 
             int batch_start = i;
             int batch_end = batch_start + batch_size;
 
+            if (batch_end > dataset->train_size) {
+                batch_end = dataset->train_size;
+            }
+
 
             for (int j = batch_start; j < batch_end; j++)
             {
@@ -316,11 +327,11 @@ int train(Network *network, Dataset *dataset, Monitor *monitor, int batch_size, 
                     return -1;
                 }
 
-                epoch_loss += mean_squared_error(prediction, target);
+                epoch_loss += cost->cost(prediction, target);
 
                 // Calculate initial delta
                 res = 0;
-                res += subtract(prediction, target);
+                res += cost->cost_der(prediction, target);
                 res += apply(last_layer->neurons, NULL, last_layer->activation->fn_der);
                 res += hadamard(prediction, last_layer->neurons, deltas[L]);
                 if (res < 0)
