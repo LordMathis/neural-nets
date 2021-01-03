@@ -30,6 +30,9 @@ Activation* create_sigmoid_activation()
     Activation *activation = (Activation *) malloc ( sizeof (Activation));
     activation->fn = &act_sigmoid;
     activation->fn_der = &act_sigmoid_der;
+    activation->type = SIGMOID;
+
+    return activation;
 }
 
 Activation* create_relu_activation()
@@ -37,6 +40,9 @@ Activation* create_relu_activation()
     Activation *activation = (Activation *) malloc ( sizeof (Activation));
     activation->fn = &act_relu;
     activation->fn_der = &act_relu_der;
+    activation->type = RELU;
+
+    return activation;
 }
 
 int delete_activation(Activation *activation)
@@ -47,7 +53,7 @@ int delete_activation(Activation *activation)
     return 0;
 }
 
-// Cost and derivatives
+// Cost functions
 
 double cost_mse(Matrix *prediction, Matrix *target)
 {
@@ -65,14 +71,18 @@ double cost_mse(Matrix *prediction, Matrix *target)
     return loss / (2*prediction->rows);    
 }
 
-int cost_mse_der(Matrix *prediction, Matrix *target)
+double cost_cross_entropy(Matrix *prediction, Matrix *target)
 {
-    return subtract(prediction, target);
-}
+    if (prediction->cols != 1 || target->cols != 1 || prediction->rows != target->rows)
+    {
+        return -1;
+    }
 
-Cost* create_mse_cost()
-{
-    Cost *cost = (Cost*) malloc ( sizeof (Cost));
-    cost->cost = &cost_mse;
-    cost->cost_der = &cost_mse_der;
+    double loss = 0;
+    for (int i = 0; i < prediction->rows; i++)
+    {
+        loss += -1 * (target->matrix[i][0] * log(prediction->matrix[i][0]) + (1 - target->matrix[i][0]) * log(1 - prediction->matrix[i][0]));
+    }
+
+    return loss;
 }

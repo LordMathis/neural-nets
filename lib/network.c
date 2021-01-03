@@ -246,11 +246,61 @@ unit_static int reset(
     }    
 }
 
+unit_static int get_initial_delta(CostType cost_type, Activation *activation, Matrix *prediction, Matrix *target, Matrix *layer_output, Matrix *delta)
+{
+    int res = 0;
+    if (cost_type == MEAN_SQUARED_ERROR)
+    {
+
+        res = 0;
+        res += subtract(prediction, target);
+        res += apply(layer_output, NULL, activation->fn_der);
+        res += hadamard(prediction, layer_output, delta);
+        if (res < 0)
+        {
+            logger(EXCEPTION, __func__, "Exception during output delta calculation");
+            return res;
+        }
+
+
+    } else if (cost_type == CROSS_ENTROPY)
+    {
+        if (activation->type == SIGMOID) {
+            res = 0;
+            res += reset_matrix(delta);
+            res += add(delta, prediction);
+            res += subtract(delta, target);
+
+            
+            if (res < 0)
+            {
+                logger(EXCEPTION, __func__, "Exception during output delta calculation");
+                return res;
+            }
+        }
+    }
+
+    return res;
+    
+}
+
+unit_static double get_loss(CostType cost_type, Matrix *prediction, Matrix *target)
+{
+    if (cost_type == MEAN_SQUARED_ERROR)
+    {
+        return cost_mse(prediction, target);
+    } else if (cost_type == CROSS_ENTROPY)
+    {
+        return cost_cross_entropy(prediction, target);   
+    }
+    
+}
+
 int train(
     Network *network,
     Dataset *dataset,
     Monitor *monitor,
-    Cost *cost,
+    CostType cost_type,
     int batch_size,
     int epochs,
     double learning_rate)
@@ -321,24 +371,18 @@ int train(
                 prediction = predict(network, dataset->train_inputs[j]);
                 target = dataset->train_labels[j];
 
-                if (predict == NULL)
+                if (prediction == NULL)
                 {
                     logger(EXCEPTION, __func__, "Exception during prediction");
                     return -1;
                 }
 
-                epoch_loss += cost->cost(prediction, target);
+                epoch_loss += get_loss(cost_type, prediction, target);
 
                 // Calculate initial delta
-                res = 0;
-                res += cost->cost_der(prediction, target);
-                res += apply(last_layer->neurons, NULL, last_layer->activation->fn_der);
-                res += hadamard(prediction, last_layer->neurons, deltas[L]);
-                if (res < 0)
-                {
-                    logger(EXCEPTION, __func__, "Exception during output delta calculation");
-                    return res;
-                }
+                get_initial_delta(cost_type, last_layer->activation, prediction, target, last_layer->neurons, deltas[L]);
+
+                // print_matrix(deltas[L]);
 
                 // Update delta weights
                 res = 0;

@@ -36,8 +36,8 @@ int main()
     int layers[] = {100,10};
 
     Activation *act_sigmoid = create_sigmoid_activation();
-    Cost *cost_mse = create_mse_cost();
+    CostType cost_type = CROSS_ENTROPY;
     Network *mnist_network = create_network(28*28, 2, layers, act_sigmoid);
 
-    train(mnist_network, dataset, monitor, cost_mse, 20, 2, 3);
+    train(mnist_network, dataset, monitor, cost_type, 20, 20, 3);
 }
