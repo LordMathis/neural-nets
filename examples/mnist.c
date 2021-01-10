@@ -33,11 +33,15 @@ int main()
     Dataset *dataset = create_dataset(num_train, 28*28, 10, num_test, train_inputs, train_labels, test_inputs, test_labels);
     Monitor monitor[] = {acc, loss};
 
-    int layers[] = {100,10};
+    int layers[] = {30,10};
 
     Activation *act_sigmoid = create_sigmoid_activation();
     CostType cost_type = CROSS_ENTROPY;
     Network *mnist_network = create_network(28*28, 2, layers, act_sigmoid);
 
-    train(mnist_network, dataset, monitor, cost_type, 20, 20, 3);
+    train(mnist_network, dataset, monitor, cost_type, 10, 2, 2);
+
+    delete_network(mnist_network);
+    delete_dataset(dataset);
+    delete_activation(act_sigmoid);
 }
