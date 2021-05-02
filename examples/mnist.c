@@ -39,7 +39,7 @@ int main()
     CostType cost_type = CROSS_ENTROPY;
     Network *mnist_network = create_network(28*28, 2, layers, act_sigmoid);
 
-    train(mnist_network, dataset, monitor, cost_type, 10, 2, 2);
+    train(mnist_network, dataset, monitor, cost_type, 10, 10, 2);
 
     delete_network(mnist_network);
     delete_dataset(dataset);
