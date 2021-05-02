@@ -51,6 +51,21 @@ static int test_create_matrix()
 
     // Cleanup
     delete_matrix(matrix);
+
+    // Test create empty matrix
+    rows = 0;
+    cols = 0;
+
+    matrix = create_matrix(rows, cols, NULL);
+
+    // Test
+    if (matrix == NULL) {
+        res+=fail(__func__, "Matrix struct is NULL");
+    }
+
+    if (matrix->matrix != NULL) {
+        res+=fail(__func__, "Matrix in matrix struct is not NULL");
+    }
    
     return eval_test_result(__func__, res);
 }

@@ -14,7 +14,7 @@ void print_network(Network *network);
 int delete_network(Network *network);
 Matrix* predict(Network *network, Matrix *input);
 double accuracy(Network *network, Matrix **inputs, Matrix **targets, int input_length);
-int train(Network *network, Dataset *dataset, Monitor *monitor, int batch_size, int epochs, double learning_rate);
+int train(Network *network, Dataset *dataset, Monitor *monitor, CostType cost_type, int batch_size, int epochs, double learning_rate);
 
 #ifdef UNIT_TEST
 #define unit_static
@@ -58,6 +58,21 @@ int reset(
     Matrix **temp_delta_weights,
     Matrix **transposed_weights,
     Matrix **delta_bias
+);
+
+int get_initial_delta(
+    CostType cost_type,
+    Activation *activation,
+    Matrix *prediction,
+    Matrix *target,
+    Matrix *layer_output,
+    Matrix *delta
+);
+
+double get_loss(
+    CostType cost_type,
+    Matrix *prediction,
+    Matrix *target
 );
 
 #else

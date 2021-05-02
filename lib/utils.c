@@ -52,6 +52,23 @@ Dataset* create_dataset(
 
 int delete_dataset(Dataset *dataset)
 {
+    for (int i = 0; i < dataset->train_size; i++)
+    {
+        free(dataset->train_inputs[i]);
+        free(dataset->train_labels[i]);
+    }
+
+    for (int i = 0; i < dataset->val_size; i++)
+    {
+        free(dataset->val_inputs[i]);
+        free(dataset->val_labels[i]);
+    }
+
+    free(dataset->train_inputs);
+    free(dataset->train_labels);
+    free(dataset->val_inputs);
+    free(dataset->val_labels);
+
     free(dataset);
     return 0;    
 }

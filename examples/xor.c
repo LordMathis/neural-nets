@@ -36,5 +36,7 @@ int main() {
     Monitor monitor[] = {acc, loss};
     Dataset *dataset = create_dataset(4,2,1,4, inputs, labels, NULL, NULL);
 
-    train(xor_network, dataset, monitor, 0, 20, 1);
+    CostType cost_type = CROSS_ENTROPY;
+
+    train(xor_network, dataset, monitor, cost_type, 0, 2000, 1);
 }
