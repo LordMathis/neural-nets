@@ -85,14 +85,15 @@ double accuracy(Network *network, Matrix **inputs, Matrix **targets, int input_l
     return (double) correct/input_length;    
 }
 
-unit_static int init_training(
+static int init_training(
     Network *network,
     Matrix **deltas,
     Matrix **temp_deltas,
     Matrix **delta_weights,
     Matrix **temp_delta_weights,
     Matrix **transposed_weights,
-    Matrix **delta_bias)
+    Matrix **delta_bias,
+    Matrix **momentums)
 {
     for (int i = 0; i < network->num_layers; i++)
     {
@@ -100,6 +101,7 @@ unit_static int init_training(
         int cols = network->layers[i]->weights->cols;
 
         delta_weights[i] = create_matrix(rows, cols, NULL);
+        momentums[i] = create_matrix(rows, cols, NULL);
         temp_delta_weights[i] = create_matrix(rows, cols, NULL);
 
         if (i>0)
@@ -123,7 +125,7 @@ unit_static int init_training(
     return 0;
 }
 
-unit_static int backpropagate(
+static int backpropagate(
     Network *network,
     Matrix *input,
     Matrix **deltas,
@@ -181,7 +183,7 @@ unit_static int backpropagate(
     }      
 }
 
-unit_static void cleanup(
+static void cleanup(
     int network_length,
     Matrix **deltas,
     Matrix **temp_deltas,
@@ -211,14 +213,15 @@ unit_static void cleanup(
     free(delta_bias);
 }
 
-unit_static int reset(
+static int reset(
     Network *network,
     Matrix **deltas,
     Matrix **temp_deltas,
     Matrix **delta_weights,
     Matrix **temp_delta_weights,
     Matrix **transposed_weights,
-    Matrix **delta_bias)
+    Matrix **delta_bias,
+    Matrix **momentums)
 {
     int res = 0;
     for (int i = 0; i < network->num_layers; i++)
@@ -227,6 +230,7 @@ unit_static int reset(
         res += reset_matrix(delta_weights[i]);
         res += reset_matrix(temp_delta_weights[i]);
         res += reset_matrix(delta_bias[i]);
+        res += reset_matrix(momentums[i]);
 
         if (i != network->num_layers - 1) {
             res += reset_matrix(transposed_weights[i]);
@@ -246,7 +250,7 @@ unit_static int reset(
     }    
 }
 
-unit_static int get_initial_delta(CostType cost_type, Activation *activation, Matrix *prediction, Matrix *target, Matrix *layer_output, Matrix *delta)
+static int get_initial_delta(CostType cost_type, Activation *activation, Matrix *prediction, Matrix *target, Matrix *layer_output, Matrix *delta)
 {
     int res = 0;
     if (cost_type == MEAN_SQUARED_ERROR)
@@ -284,7 +288,7 @@ unit_static int get_initial_delta(CostType cost_type, Activation *activation, Ma
     
 }
 
-unit_static double get_loss(CostType cost_type, Matrix *prediction, Matrix *target)
+static double get_loss(CostType cost_type, Matrix *prediction, Matrix *target)
 {
     if (cost_type == MEAN_SQUARED_ERROR)
     {
@@ -303,11 +307,14 @@ int train(
     CostType cost_type,
     int batch_size,
     int epochs,
-    double learning_rate)
+    double learning_rate,
+    double momentum)
 {
     // Allocate all the memory
     Matrix **delta_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
     Matrix **temp_delta_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
+
+    Matrix **momentums = (Matrix **) malloc (sizeof (Matrix *) * network->num_layers);
 
     Matrix **delta_bias = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
 
@@ -323,7 +330,8 @@ int train(
         delta_weights,
         temp_delta_weights,
         transposed_weights,
-        delta_bias
+        delta_bias,
+        momentums
     );
 
     Matrix *prediction;
@@ -382,8 +390,6 @@ int train(
                 // Calculate initial delta
                 get_initial_delta(cost_type, last_layer->activation, prediction, target, last_layer->neurons, deltas[L]);
 
-                // print_matrix(deltas[L]);
-
                 // Update delta weights
                 res = 0;
                 res += multiply_transposed(deltas[L], network->layers[L - 1]->neurons_act, temp_delta_weights[L]);
@@ -412,12 +418,22 @@ int train(
                     transposed_weights,
                     delta_bias
                 );
-            }        
+            }
 
+            // Adjust weights
             double eta = -1 * (learning_rate/dataset->train_size);
             for (int j = 0; j < network->num_layers; j++)
             {   
+                // Get momentum
+                scalar_multiply(momentums[j], momentum);
+
+                // Get weights adjustment
                 scalar_multiply(delta_weights[j], eta);
+
+                // Add momentum
+                add(delta_weights[j], momentums[j]);
+
+                // Set new weights
                 add(network->layers[j]->weights, delta_weights[j]);
 
                 scalar_multiply(delta_bias[j], eta);
@@ -431,7 +447,8 @@ int train(
                 delta_weights,
                 temp_delta_weights,
                 transposed_weights,
-                delta_bias
+                delta_bias,
+                momentums
             );
 
             i+=batch_size;
