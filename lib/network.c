@@ -304,11 +304,7 @@ int train(
     Network *network,
     Dataset *dataset,
     Monitor *monitor,
-    CostType cost_type,
-    int batch_size,
-    int epochs,
-    double learning_rate,
-    double momentum)
+    TrainingOptions *training_options)
 {
     // Allocate all the memory
     Matrix **delta_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers);
@@ -322,6 +318,12 @@ int train(
 
     Matrix **temp_deltas = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers -1);
     Matrix **transposed_weights = (Matrix **) malloc (sizeof (Matrix*) * network->num_layers - 1);
+
+    CostType cost_type = training_options->cost_type;
+    int batch_size = training_options->batch_size;
+    int epochs = training_options->epochs;
+    double learning_rate = training_options->learning_rate;
+    double momentum = training_options->momentum;
 
     init_training(
         network,

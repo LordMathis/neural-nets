@@ -3,6 +3,7 @@
 #define UTILS_H
 
 #include "matrix.h"
+#include "functions.h"
 
 #define RED_COLOR printf("\033[0;31m")
 #define GREEN_COLOR printf("\033[0;32m")
@@ -42,6 +43,16 @@ typedef enum {
     loss,
     acc
 } Monitor;
+
+typedef struct
+{
+    CostType cost_type;
+    int batch_size;
+    int epochs;
+    double learning_rate;
+    double momentum;
+} TrainingOptions;
+int delete_training_options(TrainingOptions *training_options);
 
 void logger(int log_level, const char *function_name, const char *message);
 
