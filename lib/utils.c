@@ -56,18 +56,19 @@ int delete_dataset(Dataset *dataset)
     {
         delete_matrix(dataset->train_inputs[i]);
         delete_matrix(dataset->train_labels[i]);
+
+        dataset->train_inputs[i] = NULL;
+        dataset->train_labels[i] = NULL;
     }
 
     for (int i = 0; i < dataset->val_size; i++)
     {
         delete_matrix(dataset->val_inputs[i]);
         delete_matrix(dataset->val_labels[i]);
-    }
 
-    free(dataset->train_inputs);
-    free(dataset->train_labels);
-    free(dataset->val_inputs);
-    free(dataset->val_labels);
+        dataset->val_inputs[i] = NULL;
+        dataset->val_labels[i] = NULL;
+    }
 
     free(dataset);
     return 0;    

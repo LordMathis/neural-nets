@@ -48,7 +48,7 @@ int main() {
     train(xor_network, dataset, monitor, training_options);
 
     delete_network(xor_network);
-    delete_dataset(dataset);
     delete_activation(act_sigmoid);
+    delete_dataset(dataset);
     free(training_options);
 }
