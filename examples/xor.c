@@ -38,17 +38,18 @@ int main() {
 
     CostType cost_type = CROSS_ENTROPY;
 
-    TrainingOptions *training_options = (TrainingOptions *) malloc (sizeof (TrainingOptions));
+    TrainingOptions *training_options = init_training_options();
     training_options->cost_type = cost_type;
     training_options->epochs = 2000;
     training_options->batch_size = 0;
     training_options->learning_rate = 1;
     training_options->momentum = 0.9;
+    training_options->regularization_lambda = 0.0001;
 
     train(xor_network, dataset, monitor, training_options);
 
     delete_network(xor_network);
     delete_activation(act_sigmoid);
     delete_dataset(dataset);
-    free(training_options);
+    delete_training_options(training_options);
 }

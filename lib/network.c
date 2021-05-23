@@ -324,6 +324,7 @@ int train(
     int epochs = training_options->epochs;
     double learning_rate = training_options->learning_rate;
     double momentum = training_options->momentum;
+    double reg_lambda = training_options->regularization_lambda;
 
     init_training(
         network,
@@ -423,7 +424,7 @@ int train(
             }
 
             // Adjust weights
-            double eta = -1 * (learning_rate/dataset->train_size);
+            double eta = -1 * (learning_rate/batch_size);
             for (int j = 0; j < network->num_layers; j++)
             {   
                 // Get momentum
@@ -435,9 +436,21 @@ int train(
                 // Add momentum
                 add(delta_weights[j], momentums[j]);
 
+                // printf("Weights Matrix before adjustment\n");
+                // print_matrix(network->layers[j]->weights);
+                // printf("\n");
+
+                // L2 Regularization
+                scalar_multiply(network->layers[j]->weights, 1 - ((learning_rate * reg_lambda)/dataset->train_size));
+
                 // Set new weights
                 add(network->layers[j]->weights, delta_weights[j]);
 
+                // printf("Weights Matrix after adjustment\n");
+                // print_matrix(network->layers[j]->weights);
+                // printf("\n");
+
+                // Set bias
                 scalar_multiply(delta_bias[j], eta);
                 add(network->layers[j]->bias, delta_bias[j]);
             }

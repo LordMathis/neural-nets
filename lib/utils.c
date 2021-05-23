@@ -52,26 +52,26 @@ Dataset* create_dataset(
 
 int delete_dataset(Dataset *dataset)
 {
+    if (dataset == NULL) {
+        return -1;
+    }
+
     for (int i = 0; i < dataset->train_size; i++)
     {
         delete_matrix(dataset->train_inputs[i]);
         delete_matrix(dataset->train_labels[i]);
-
-        dataset->train_inputs[i] = NULL;
-        dataset->train_labels[i] = NULL;
     }
 
     for (int i = 0; i < dataset->val_size; i++)
     {
         delete_matrix(dataset->val_inputs[i]);
         delete_matrix(dataset->val_labels[i]);
-
-        dataset->val_inputs[i] = NULL;
-        dataset->val_labels[i] = NULL;
     }
 
     free(dataset);
-    return 0;    
+    dataset = NULL;
+
+    return 0;
 }
 
 Matrix** load_csv(char *filename, int lines, int line_length)
@@ -152,4 +152,23 @@ int normalize(Matrix **a, int length, int max_num)
     }
     
     return 0;
+}
+
+TrainingOptions* init_training_options()
+{
+    TrainingOptions *training_options = (TrainingOptions *) malloc (sizeof (TrainingOptions));
+    training_options->cost_type = CROSS_ENTROPY;
+    training_options->epochs = 0;
+    training_options->batch_size = 0;
+    training_options->learning_rate = 0;
+    training_options->momentum = 0;
+    training_options->regularization_lambda = 0;
+
+    return training_options;
+}
+
+int delete_training_options(TrainingOptions *training_options)
+{
+    free(training_options);
+    training_options = NULL;
 }

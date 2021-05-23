@@ -51,7 +51,10 @@ typedef struct
     int epochs;
     double learning_rate;
     double momentum;
+    double regularization_lambda;
 } TrainingOptions;
+
+TrainingOptions* init_training_options();
 int delete_training_options(TrainingOptions *training_options);
 
 void logger(int log_level, const char *function_name, const char *message);

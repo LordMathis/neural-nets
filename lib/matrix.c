@@ -328,6 +328,7 @@ int delete_matrix(Matrix *a)
 
     free(a->matrix);
     free(a);
+    a = NULL;
     
     return 0;
 }
