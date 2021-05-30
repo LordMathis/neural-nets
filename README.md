@@ -40,7 +40,7 @@ make mnist
 
 ~97% validation accuracy after around 10 epochs
 * sigmoid activation and cross entropy cost
-* single hidden layer with 50 hidden neurons
+* single hidden layer with 100 hidden neurons
 * learning rate: 0.1
 * batch size: 10
 * momentum 0.9
